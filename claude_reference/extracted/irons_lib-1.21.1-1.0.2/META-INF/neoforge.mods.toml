@@ -1,0 +1,49 @@
+modLoader = "javafml" #mandatory
+loaderVersion = "[1,)" #mandatory
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "irons_lib" #mandatory
+version = "1.21.1-1.0.2" #mandatory
+displayName = "Iron's Lib" #mandatory
+description = '''
+Provides common functionality and content for Iron431's mods.
+'''
+
+[[mixins]]
+config = "irons_lib.mixins.json"
+
+# The [[accessTransformers]] block allows you to declare where your AT file is.
+# If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg
+#[[accessTransformers]]
+#file="META-INF/accesstransformer.cfg"
+
+# The coremods config file path is not configurable and is always loaded from META-INF/coremods.json
+
+[[dependencies.irons_lib]] #optional
+    modId = "neoforge" #mandatory
+    type = "required" #mandatory
+    versionRange = "[21.1.200,)" #mandatory
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.irons_lib]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "[1.21.1]"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.irons_lib]]
+    modId = "geckolib"
+    type = "required"
+    versionRange = "4.7.5.1"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.irons_lib]]
+    modId = "irons_patreon_lib"
+    type = "incompatible"
+    ordering = "NONE"
+    side = "BOTH"
+    reason = "Patreon Lib is superceeded by Iron's Lib! You can safely uninstall it."

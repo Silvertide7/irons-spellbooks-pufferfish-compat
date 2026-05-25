@@ -1,0 +1,9 @@
+{
+  "normal": {
+    "bidirectional": [
+      ["mining_root", "mining_armor"],
+      ["mining_armor", "mining_health"],
+      ["mining_health", "mining_luck"]
+    ]
+  }
+}

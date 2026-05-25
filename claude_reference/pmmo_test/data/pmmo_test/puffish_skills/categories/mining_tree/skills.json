@@ -1,0 +1,6 @@
+{
+  "mining_root":   { "definition": "mining_root",   "x":  0, "y":   0, "root": true },
+  "mining_armor":  { "definition": "mining_armor",  "x":  0, "y": -50 },
+  "mining_health": { "definition": "mining_health", "x":  0, "y": -100 },
+  "mining_luck":   { "definition": "mining_luck",   "x":  0, "y": -150 }
+}

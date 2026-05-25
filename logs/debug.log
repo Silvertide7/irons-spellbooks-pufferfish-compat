@@ -1,0 +1,44 @@
+[24May2026 23:40:43.810] [Test worker/DEBUG] [io.netty.util.internal.logging.InternalLoggerFactory/]: Using SLF4J as the default logging framework
+[24May2026 23:40:43.815] [Test worker/DEBUG] [io.netty.util.ResourceLeakDetector/]: -Dio.netty.leakDetection.level: simple
+[24May2026 23:40:43.815] [Test worker/DEBUG] [io.netty.util.ResourceLeakDetector/]: -Dio.netty.leakDetection.targetRecords: 4
+[24May2026 23:40:43.821] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: -Dio.netty.noUnsafe: false
+[24May2026 23:40:43.821] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: Java version: 21
+[24May2026 23:40:43.822] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: sun.misc.Unsafe.theUnsafe: available
+[24May2026 23:40:43.822] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: sun.misc.Unsafe.copyMemory: available
+[24May2026 23:40:43.822] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: sun.misc.Unsafe.storeFence: available
+[24May2026 23:40:43.823] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: java.nio.Buffer.address: available
+[24May2026 23:40:43.823] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: java.nio.Bits.unaligned: available, true
+[24May2026 23:40:43.824] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent0/]: java.nio.DirectByteBuffer.<init>(long, {int,long}): unavailable
+[24May2026 23:40:43.824] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: sun.misc.Unsafe: available
+[24May2026 23:40:43.824] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: maxDirectMemory: 536870912 bytes (maybe)
+[24May2026 23:40:43.824] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.tmpdir: /var/folders/s1/yyc3krt91zl8kmbd60b6kv940000gn/T (java.io.tmpdir)
+[24May2026 23:40:43.824] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.bitMode: 64 (sun.arch.data.model)
+[24May2026 23:40:43.825] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: Platform: MacOS
+[24May2026 23:40:43.825] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.maxDirectMemory: -1 bytes
+[24May2026 23:40:43.825] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.uninitializedArrayAllocationThreshold: -1
+[24May2026 23:40:43.825] [Test worker/DEBUG] [io.netty.util.internal.CleanerJava9/]: java.nio.ByteBuffer.cleaner(): available
+[24May2026 23:40:43.825] [Test worker/DEBUG] [io.netty.util.internal.PlatformDependent/]: -Dio.netty.noPreferDirect: false
+[24May2026 23:40:43.829] [Test worker/DEBUG] [io.netty.buffer.AbstractByteBuf/]: -Dio.netty.buffer.checkAccessible: true
+[24May2026 23:40:43.829] [Test worker/DEBUG] [io.netty.buffer.AbstractByteBuf/]: -Dio.netty.buffer.checkBounds: true
+[24May2026 23:40:43.829] [Test worker/DEBUG] [io.netty.util.ResourceLeakDetectorFactory/]: Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@5b4d25e7
+[24May2026 23:40:43.831] [Test worker/DEBUG] [io.netty.util.internal.InternalThreadLocalMap/]: -Dio.netty.threadLocalMap.stringBuilder.initialSize: 1024
+[24May2026 23:40:43.831] [Test worker/DEBUG] [io.netty.util.internal.InternalThreadLocalMap/]: -Dio.netty.threadLocalMap.stringBuilder.maxSize: 4096
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.numHeapArenas: 21
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.numDirectArenas: 21
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.pageSize: 8192
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.maxOrder: 9
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.chunkSize: 4194304
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.smallCacheSize: 256
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.normalCacheSize: 64
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.maxCachedBufferCapacity: 32768
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.cacheTrimInterval: 8192
+[24May2026 23:40:43.833] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.cacheTrimIntervalMillis: 0
+[24May2026 23:40:43.834] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.useCacheForAllThreads: false
+[24May2026 23:40:43.834] [Test worker/DEBUG] [io.netty.buffer.PooledByteBufAllocator/]: -Dio.netty.allocator.maxCachedByteBuffersPerChunk: 1023
+[24May2026 23:40:43.838] [Test worker/DEBUG] [io.netty.buffer.ByteBufUtil/]: -Dio.netty.allocator.type: pooled
+[24May2026 23:40:43.838] [Test worker/DEBUG] [io.netty.buffer.ByteBufUtil/]: -Dio.netty.threadLocalDirectBufferSize: 0
+[24May2026 23:40:43.838] [Test worker/DEBUG] [io.netty.buffer.ByteBufUtil/]: -Dio.netty.maxThreadLocalCharBufferSize: 16384
+[24May2026 23:40:43.857] [Test worker/WARN] [net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat/]: Skipping malformed innate_spell file example_pack:bad_category_type: Not a string: 42
+[24May2026 23:40:43.858] [Test worker/WARN] [net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat/]: Skipping malformed innate_spell file example_pack:missing_skill: No key skill in MapLike[{"category":"example_pack:magic","spell":"irons_spellbooks:fireball"}]
+[24May2026 23:40:43.864] [Test worker/WARN] [net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat/]: Skipping malformed skill_blocks file example_pack:missing_blocks: No key blocks in MapLike[{"category":"x:y","skill":"bad_skill"}]
+[24May2026 23:40:43.870] [Test worker/WARN] [net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat/]: Skipping malformed spell_skill_requirement example_pack:bad_no_spell: No key spell in MapLike[{"category":"example_pack:magic","skill":"pyromancy"}]

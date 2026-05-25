@@ -1,0 +1,8 @@
+{
+  "pmmo_skill": "mining",
+  "awards": [
+    {
+      "skill_category": "pmmo_test:mining_tree"
+    }
+  ]
+}

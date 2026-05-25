@@ -1,0 +1,15 @@
+{
+  "message.irons_spellbooks_pufferfish_compat.skill_required": "You haven't learned this spell yet.",
+  "message.irons_spellbooks_pufferfish_compat.skill_required_inscribe": "You haven't learned enough to inscribe this spell.",
+
+  "key.categories.irons_spellbooks_pufferfish_compat": "Iron's Spellbooks ↔ Pufferfish",
+  "key.irons_spellbooks_pufferfish_compat.open_wheel": "Open innate spell wheel (hold)",
+  "key.irons_spellbooks_pufferfish_compat.toggle_wheel": "Toggle innate spell wheel",
+  "key.irons_spellbooks_pufferfish_compat.cast_innate": "Cast innate spell",
+  "key.irons_spellbooks_pufferfish_compat.scroll_cycle_modifier": "Scroll to cycle innate spells (hold)",
+
+  "hud.irons_spellbooks_pufferfish_compat.innate_label": "Innate",
+  "hud.irons_spellbooks_pufferfish_compat.innate_tag": "[ Innate ]",
+  "hud.irons_spellbooks_pufferfish_compat.wheel_level": "Level %s",
+  "hud.irons_spellbooks_pufferfish_compat.wheel_mana": "Mana cost: %s"
+}

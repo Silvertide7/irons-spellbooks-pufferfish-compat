@@ -1,0 +1,61 @@
+{
+  "mining_root": {
+    "title": { "text": "Miner's Start" },
+    "icon": {
+      "type": "item",
+      "data": { "item": "minecraft:wooden_pickaxe" }
+    },
+    "rewards": []
+  },
+  "mining_armor": {
+    "title": { "text": "Tough Hide" },
+    "icon": {
+      "type": "item",
+      "data": { "item": "minecraft:stone_pickaxe" }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 1
+        }
+      }
+    ]
+  },
+  "mining_health": {
+    "title": { "text": "Sturdy Body" },
+    "icon": {
+      "type": "item",
+      "data": { "item": "minecraft:iron_pickaxe" }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_value",
+          "value": 2
+        }
+      }
+    ]
+  },
+  "mining_luck": {
+    "title": { "text": "Fortune's Favor" },
+    "icon": {
+      "type": "item",
+      "data": { "item": "minecraft:diamond_pickaxe" }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.luck",
+          "operation": "add_value",
+          "value": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "pmmo_skill": "combat",
+  "awards": [
+    {
+      "skill_category": "test_pack:combat_tree"
+    },
+    {
+      "skill_category": "test_pack:warrior_tree"
+    }
+  ]
+}
