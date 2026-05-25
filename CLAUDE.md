@@ -19,6 +19,14 @@ If a spell appears in either store, the player needs every listed skill (AND sem
 
 Unlocking a configured Pufferfish skill grants the player innate access to a spell — castable from a keybind with no spellbook, sword, or scroll required. Casts still consume mana and respect cooldown (`CastSource.SPELLBOOK`), and they still flow through `SpellPreCastEvent`, so the gate from feature 1 composes naturally.
 
+**Upgrading via chain-of-nodes.** Pufferfish nodes are binary (taken / not taken) — there is no per-node "rank up" concept. To let a player level up a spell, add multiple skill nodes each granting the same `spell` at progressively higher `level`, chained via `connections.json`:
+
+```
+[innate_firebolt   level 1]  →  [innate_firebolt_2  level 2]  →  [innate_firebolt_3  level 3]
+```
+
+`InnatePool.compose` deduplicates by spell ID and keeps the **highest** level grant. So a player who has unlocked all three skills sees only one Firebolt entry in their pool — at level 3. The lower-level definitions are still useful: they fence the chain (you have to take level 1 to be able to take level 2) and they specify the unlock cost per rank.
+
 Default keybinds (rebindable, chosen to avoid Iron's Spellbooks defaults):
 - **Hold `Z`** — opens the innate spell wheel (radial menu); release to commit the highlighted spell as the new selection.
 - **`X`** — casts the currently selected spell.
@@ -74,7 +82,7 @@ requirement/SpellSkillBlocks           SimpleJsonResourceReloadListener at skill
 skills/SkillKey                  record: (category: ResourceLocation, skill: String)
 innate/InnateSpellGrant          record: (spell, level) + Codec + StreamCodec
 innate/InnateSpellGrants         SimpleJsonResourceReloadListener at innate_spells/, keyed by SkillKey
-innate/InnatePool                composes a ServerPlayer's current pool from grants + Pufferfish state
+innate/InnatePool                composes a ServerPlayer's current pool from grants + Pufferfish state; dedupes by spell, keeps highest level
 
 skills/PuffishSkillsLookup       isolates Pufferfish API: hasUnlocked(player, SkillKey)
 skills/InnateSyncBootstrap       login + tick-driven pool sync to clients

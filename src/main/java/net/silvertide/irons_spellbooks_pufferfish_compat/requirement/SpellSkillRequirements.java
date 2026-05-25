@@ -27,9 +27,6 @@ public final class SpellSkillRequirements extends SimpleJsonResourceReloadListen
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> rawEntries, ResourceManager resourceManager, ProfilerFiller profiler) {
         requiredSkillBySpell = parseAll(rawEntries);
-        IronsSpellbooksPufferfishCompat.LOGGER.info(
-                "Loaded {} spell_skill_requirement entries: {}",
-                requiredSkillBySpell.size(), requiredSkillBySpell.keySet());
     }
 
     public Optional<SkillKey> findForSpell(ResourceLocation spellId) {

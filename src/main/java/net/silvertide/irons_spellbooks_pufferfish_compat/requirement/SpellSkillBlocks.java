@@ -28,9 +28,6 @@ public final class SpellSkillBlocks extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> rawEntries, ResourceManager resourceManager, ProfilerFiller profiler) {
         blockersBySpell = parseAll(rawEntries);
-        IronsSpellbooksPufferfishCompat.LOGGER.info(
-                "Loaded {} skill_blocks entries spanning {} blocked spells: {}",
-                rawEntries.size(), blockersBySpell.size(), blockersBySpell.keySet());
     }
 
     public Set<SkillKey> blockersFor(ResourceLocation spellId) {
@@ -38,7 +35,7 @@ public final class SpellSkillBlocks extends SimpleJsonResourceReloadListener {
     }
 
     static Map<ResourceLocation, Set<SkillKey>> parseAll(Map<ResourceLocation, JsonElement> rawEntries) {
-        Map<ResourceLocation, Set<SkillKey>> mutableBlockers = new HashMap<>();
+        Map<ResourceLocation, Set<SkillKey>> blockersBySpell = new HashMap<>();
         for (Map.Entry<ResourceLocation, JsonElement> entry : rawEntries.entrySet()) {
             ResourceLocation fileId = entry.getKey();
             SkillBlockedSpells.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
@@ -46,14 +43,13 @@ public final class SpellSkillBlocks extends SimpleJsonResourceReloadListener {
                             "Skipping malformed skill_blocks file {}: {}", fileId, error))
                     .ifPresent(parsed -> {
                         for (ResourceLocation blockedSpell : parsed.blockedSpells()) {
-                            mutableBlockers
+                            blockersBySpell
                                     .computeIfAbsent(blockedSpell, key -> new HashSet<>())
                                     .add(parsed.blockingSkill());
                         }
                     });
         }
-        Map<ResourceLocation, Set<SkillKey>> immutable = new HashMap<>();
-        mutableBlockers.forEach((spellId, blockers) -> immutable.put(spellId, Set.copyOf(blockers)));
-        return Map.copyOf(immutable);
+        blockersBySpell.replaceAll((spellId, blockers) -> Set.copyOf(blockers));
+        return Map.copyOf(blockersBySpell);
     }
 }

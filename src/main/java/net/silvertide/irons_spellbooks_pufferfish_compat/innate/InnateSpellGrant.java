@@ -9,10 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 
 public record InnateSpellGrant(ResourceLocation spell, int level) {
     public static final int DEFAULT_LEVEL = 1;
+    public static final int MIN_LEVEL = 1;
 
     public static final Codec<InnateSpellGrant> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("spell").forGetter(InnateSpellGrant::spell),
-            Codec.INT.optionalFieldOf("level", DEFAULT_LEVEL).forGetter(InnateSpellGrant::level)
+            Codec.intRange(MIN_LEVEL, Integer.MAX_VALUE)
+                    .optionalFieldOf("level", DEFAULT_LEVEL).forGetter(InnateSpellGrant::level)
     ).apply(instance, InnateSpellGrant::new));
 
     public static final StreamCodec<ByteBuf, InnateSpellGrant> STREAM_CODEC = StreamCodec.composite(

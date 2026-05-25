@@ -1,10 +1,8 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.network;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -40,7 +38,6 @@ public final class CompatPayloads {
     }
 
     private static void onClientReceiveInnatePool(InnatePoolPayload payload, IPayloadContext context) {
-        if (FMLEnvironment.dist != Dist.CLIENT) return;
         context.enqueueWork(() -> InnatePayloadHandler.onInnatePool(payload));
     }
 }

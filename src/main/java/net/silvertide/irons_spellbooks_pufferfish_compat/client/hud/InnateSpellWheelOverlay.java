@@ -3,7 +3,6 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.client.hud;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.api.util.Utils;
 import net.minecraft.ChatFormatting;
@@ -24,10 +23,12 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfi
 import net.silvertide.irons_spellbooks_pufferfish_compat.client.ClientInnateState;
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.ClientConfig;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrant;
+import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpells;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 import java.util.List;
+import java.util.Optional;
 
 public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
     public static final InnateSpellWheelOverlay INSTANCE = new InnateSpellWheelOverlay();
@@ -40,7 +41,15 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
     private static final float RING_INNER_EDGE = 20f;
     private static final float RING_OUTER_EDGE = 80f;
     private static final float RING_DEAD_ZONE_RADIUS = 65f;
-    private static final float CATEGORY_LINE_WIDTH = 2f;
+    private static final float CATEGORY_LINE_EXTENSION = 2f;
+
+    private static final int ICON_SIZE = 16;
+    private static final int ICON_HALF = ICON_SIZE / 2;
+    private static final int BORDER_SIZE = 32;
+    private static final int BORDER_HALF = BORDER_SIZE / 2;
+    private static final int UNSELECTED_BORDER_U = 0;
+    private static final int SELECTED_BORDER_U = 32;
+    private static final int BORDER_V = 106;
 
     private static final int LABEL_TEXT_MARGIN = 5;
     private static final int LABEL_TITLE_MARGIN = 5;
@@ -48,10 +57,14 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
     private static final int LABEL_INNATE_TAG_COLOR = 0xFFAAAAFF;
     private static final int LABEL_UNIQUE_INFO_COLOR = 0x3BE33B;
 
-    public boolean active;
+    private boolean active;
     private int wheelSelection;
 
     private InnateSpellWheelOverlay() {}
+
+    public boolean isActive() {
+        return active;
+    }
 
     public void open() {
         if (ClientInnateState.pool().isEmpty()) return;
@@ -116,7 +129,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
                 (float) minecraft.mouseHandler.ypos());
         double radiansPerSpell = Math.toRadians(360f / (float) totalSpells);
         float mouseRotation = (Utils.getAngle(mousePos, screenCenterPhysical)
-                + 1.570f + (float) radiansPerSpell * .5f) % 6.283f;
+                + Mth.HALF_PI + (float) radiansPerSpell * .5f) % Mth.TWO_PI;
 
         wheelSelection = (int) Mth.clamp(mouseRotation / radiansPerSpell, 0, totalSpells - 1);
         if (mousePos.distanceToSqr(screenCenterPhysical) < RING_DEAD_ZONE_RADIUS * RING_DEAD_ZONE_RADIUS) {
@@ -151,23 +164,23 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
         PoseStack poseStack = graphics.pose();
         for (int i = 0; i < iconPositions.length; i++) {
             InnateSpellGrant grant = pool.get(i);
-            AbstractSpell spell = SpellRegistry.getSpell(grant.spell());
-            if (spell == null || !grant.spell().equals(spell.getSpellResource())) continue;
+            Optional<AbstractSpell> resolved = InnateSpells.resolve(grant.spell());
+            if (resolved.isEmpty()) continue;
+            AbstractSpell spell = resolved.get();
 
             poseStack.pushPose();
             poseStack.translate(centerX, centerY, 0);
             poseStack.scale(iconScale, iconScale, iconScale);
 
-            int iconHalfWidth = 16 / 2;
-            int borderHalfWidth = 32 / 2;
             graphics.blit(spell.getSpellIconResource(),
-                    (int) iconPositions[i].x - iconHalfWidth,
-                    (int) iconPositions[i].y - iconHalfWidth,
-                    0, 0, 16, 16, 16, 16);
+                    (int) iconPositions[i].x - ICON_HALF,
+                    (int) iconPositions[i].y - ICON_HALF,
+                    0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
             graphics.blit(TEXTURE,
-                    (int) iconPositions[i].x - borderHalfWidth,
-                    (int) iconPositions[i].y - borderHalfWidth,
-                    selectedIndex == i ? 32 : 0, 106, 32, 32);
+                    (int) iconPositions[i].x - BORDER_HALF,
+                    (int) iconPositions[i].y - BORDER_HALF,
+                    selectedIndex == i ? SELECTED_BORDER_U : UNSELECTED_BORDER_U,
+                    BORDER_V, BORDER_SIZE, BORDER_SIZE);
 
             poseStack.popPose();
         }
@@ -175,8 +188,9 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
 
     private void renderInfoText(GuiGraphics graphics, Font font, Player player,
                                 InnateSpellGrant grant, int centerX, int centerY) {
-        AbstractSpell spell = SpellRegistry.getSpell(grant.spell());
-        if (spell == null || !grant.spell().equals(spell.getSpellResource())) return;
+        Optional<AbstractSpell> resolved = InnateSpells.resolve(grant.spell());
+        if (resolved.isEmpty()) return;
+        AbstractSpell spell = resolved.get();
 
         int effectiveLevel = spell.getLevelFor(grant.level(), player);
         List<MutableComponent> uniqueInfo = spell.getUniqueInfo(effectiveLevel, player);
@@ -254,7 +268,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
             vertexConsumer.addVertex(pose, centerX + x1Outer, centerY + y1Outer, 0)
                     .setColor(buttonColor.x(), buttonColor.y(), buttonColor.z(), 0);
 
-            float categoryLineEdge = RING_INNER_EDGE + 2f;
+            float categoryLineEdge = RING_INNER_EDGE + CATEGORY_LINE_EXTENSION;
             float x1CategoryOuter = Mth.cos(beginRadians) * categoryLineEdge;
             float x2CategoryOuter = Mth.cos(endRadians) * categoryLineEdge;
             float y1CategoryOuter = Mth.sin(beginRadians) * categoryLineEdge;

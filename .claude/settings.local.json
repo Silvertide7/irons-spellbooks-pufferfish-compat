@@ -99,7 +99,9 @@
       "Bash(javap -p -c /tmp/iss-full/io/redspace/ironsspellbooks/item/SpellBook.class)",
       "Bash(javap -v -p claude_reference/extracted/puffish_skills-0.17.3-1.21-neoforge/net/puffish/skillsmod/commands/SkillsCommand.class)",
       "Bash(javap -p claude_reference/extracted/puffish_skills-0.17.3-1.21-neoforge/net/puffish/skillsmod/reward/builtin/CommandReward.class)",
-      "Bash(javap -v -p claude_reference/extracted/puffish_skills-0.17.3-1.21-neoforge/net/puffish/skillsmod/reward/builtin/CommandReward.class)"
+      "Bash(javap -v -p claude_reference/extracted/puffish_skills-0.17.3-1.21-neoforge/net/puffish/skillsmod/reward/builtin/CommandReward.class)",
+      "Bash(grep -iE \"\\\\.log\\(\\\\.|$\\)|^logs/\")",
+      "Bash(git rm *)"
     ]
   }
 }

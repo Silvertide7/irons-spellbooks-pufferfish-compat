@@ -1,13 +1,11 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -16,6 +14,7 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.client.ClientInnateStat
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.ClientConfig;
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.InnateHudDisplay;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrant;
+import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpells;
 
 import java.util.Optional;
 
@@ -76,8 +75,9 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
         Optional<InnateSpellGrant> selectedGrant = ClientInnateState.selectedGrant();
         if (selectedGrant.isEmpty()) return;
 
-        AbstractSpell spell = SpellRegistry.getSpell(selectedGrant.get().spell());
-        if (spell == null || !selectedGrant.get().spell().equals(spell.getSpellResource())) return;
+        Optional<AbstractSpell> resolvedSpell = InnateSpells.resolve(selectedGrant.get().spell());
+        if (resolvedSpell.isEmpty()) return;
+        AbstractSpell spell = resolvedSpell.get();
 
         int screenWidth = graphics.guiWidth();
         int screenHeight = graphics.guiHeight();
@@ -120,7 +120,6 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
     private void prepTranslucency() {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getRendertypeTranslucentShader);
         RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
     }
 

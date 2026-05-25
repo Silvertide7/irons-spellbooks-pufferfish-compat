@@ -34,12 +34,13 @@ public final class InnateInputHandler {
         while (InnateKeybinds.OPEN_WHEEL.consumeClick()) {
             if (!wasWheelKeyDown) {
                 InnateSpellWheelOverlay.INSTANCE.open();
+                wasWheelKeyDown = true;
             }
         }
         handleWheelKeyRelease();
 
         if (InnateKeybinds.TOGGLE_WHEEL.consumeClick()) {
-            if (InnateSpellWheelOverlay.INSTANCE.active) {
+            if (InnateSpellWheelOverlay.INSTANCE.isActive()) {
                 InnateSpellWheelOverlay.INSTANCE.close();
             } else {
                 InnateSpellWheelOverlay.INSTANCE.open();
@@ -75,7 +76,7 @@ public final class InnateInputHandler {
     private static void handleWheelKeyRelease() {
         boolean isDown = InnateKeybinds.OPEN_WHEEL.isDown();
         boolean wasReleased = wasWheelKeyDown && !isDown;
-        if (wasReleased && InnateSpellWheelOverlay.INSTANCE.active) {
+        if (wasReleased && InnateSpellWheelOverlay.INSTANCE.isActive()) {
             InnateSpellWheelOverlay.INSTANCE.close();
         }
         wasWheelKeyDown = isDown;

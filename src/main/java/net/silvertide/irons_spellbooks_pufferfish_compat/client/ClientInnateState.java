@@ -36,25 +36,25 @@ public final class ClientInnateState {
     }
 
     public static void cycleNext() {
-        if (pool.size() <= 1) return;
-        selectedIndex = (selectedIndex + 1) % pool.size();
+        int size = pool.size();
+        if (size <= 1) return;
+        selectedIndex = (selectedIndex + 1) % size;
     }
 
     public static void cyclePrevious() {
-        if (pool.size() <= 1) return;
         int size = pool.size();
+        if (size <= 1) return;
         selectedIndex = (selectedIndex - 1 + size) % size;
     }
 
     public static void setSelectedIndex(int index) {
-        if (pool.isEmpty()) {
+        int size = pool.size();
+        if (size == 0) {
             selectedIndex = 0;
-            return;
-        }
-        if (index < 0) {
+        } else if (index < 0) {
             selectedIndex = 0;
-        } else if (index >= pool.size()) {
-            selectedIndex = pool.size() - 1;
+        } else if (index >= size) {
+            selectedIndex = size - 1;
         } else {
             selectedIndex = index;
         }
