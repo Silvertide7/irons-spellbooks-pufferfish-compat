@@ -19,11 +19,11 @@ public final class InnatePool {
 
     public static List<InnateSpellGrant> currentPool(ServerPlayer player) {
         Set<SkillKey> unlockedSkills = new HashSet<>();
-        SkillsAPI.streamCategories().forEach(category -> {
-            var categoryId = category.getId();
-            category.streamUnlockedSkills(player)
-                    .forEach(skill -> unlockedSkills.add(new SkillKey(categoryId, skill.getId())));
-        });
+        SkillsAPI.streamCategories().forEach(category ->
+                category.streamUnlockedSkills(player)
+                        .filter(skill -> category.getSkill(skill.getId()).isPresent())
+                        .forEach(skill ->
+                                unlockedSkills.add(new SkillKey(category.getId(), skill.getId()))));
         return compose(unlockedSkills, InnateSpellGrants.INSTANCE::findForSkill);
     }
 

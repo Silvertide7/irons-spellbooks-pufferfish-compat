@@ -1,7 +1,6 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat;
 
 import com.mojang.logging.LogUtils;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
@@ -18,7 +17,7 @@ public class IronsSpellbooksPufferfishCompat {
     public static final String MODID = "irons_spellbooks_pufferfish_compat";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public IronsSpellbooksPufferfishCompat(IEventBus modEventBus, ModContainer modContainer) {
+    public IronsSpellbooksPufferfishCompat(ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         NeoForge.EVENT_BUS.addListener(IronsSpellbooksPufferfishCompat::registerReloadListeners);
     }

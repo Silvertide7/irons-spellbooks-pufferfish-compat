@@ -1,5 +1,6 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.client;
 
+import net.minecraft.resources.ResourceLocation;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrant;
 
 import java.util.List;
@@ -27,12 +28,21 @@ public final class ClientInnateState {
     }
 
     public static void replacePool(List<InnateSpellGrant> next) {
+        ResourceLocation previouslySelectedSpell = currentlySelectedSpellId();
         pool = List.copyOf(next);
-        if (pool.isEmpty()) {
-            selectedIndex = 0;
-        } else if (selectedIndex >= pool.size()) {
-            selectedIndex = pool.size() - 1;
+        selectedIndex = indexOfSpell(previouslySelectedSpell).orElse(0);
+    }
+
+    private static ResourceLocation currentlySelectedSpellId() {
+        return selectedGrant().map(InnateSpellGrant::spell).orElse(null);
+    }
+
+    private static Optional<Integer> indexOfSpell(ResourceLocation spellId) {
+        if (spellId == null) return Optional.empty();
+        for (int i = 0; i < pool.size(); i++) {
+            if (pool.get(i).spell().equals(spellId)) return Optional.of(i);
         }
+        return Optional.empty();
     }
 
     public static void cycleNext() {

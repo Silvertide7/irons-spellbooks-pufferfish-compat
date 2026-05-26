@@ -18,7 +18,7 @@ public final class InnateKeybinds {
             "key." + IronsSpellbooksPufferfishCompat.MODID + ".open_wheel",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            InputConstants.KEY_Z,
+            InputConstants.KEY_C,
             KEYBIND_CATEGORY);
 
     public static final KeyMapping TOGGLE_WHEEL = new KeyMapping(
@@ -39,7 +39,7 @@ public final class InnateKeybinds {
             "key." + IronsSpellbooksPufferfishCompat.MODID + ".scroll_cycle_modifier",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            InputConstants.KEY_C,
+            InputConstants.KEY_Z,
             KEYBIND_CATEGORY);
 
     private InnateKeybinds() {}

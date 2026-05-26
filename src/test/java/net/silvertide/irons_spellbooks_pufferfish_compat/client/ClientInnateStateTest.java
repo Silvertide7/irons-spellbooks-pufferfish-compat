@@ -52,7 +52,7 @@ class ClientInnateStateTest {
     }
 
     @Test
-    void replacePoolClampsSelectedIndexWhenPoolShrinks() {
+    void replacePoolFallsBackToZeroWhenSelectedSpellRemoved() {
         ClientInnateState.replacePool(List.of(FIREBALL, ICEBALL, LIGHTNING));
         ClientInnateState.setSelectedIndex(2);
         ClientInnateState.replacePool(List.of(FIREBALL));
@@ -60,11 +60,28 @@ class ClientInnateStateTest {
     }
 
     @Test
-    void replacePoolPreservesSelectedIndexWhenInBounds() {
+    void replacePoolPreservesSelectedSpellWhenStillPresent() {
         ClientInnateState.replacePool(List.of(FIREBALL, ICEBALL, LIGHTNING));
         ClientInnateState.setSelectedIndex(1);
         ClientInnateState.replacePool(List.of(FIREBALL, ICEBALL, LIGHTNING));
+        assertEquals(ICEBALL, ClientInnateState.selectedGrant().orElseThrow());
+    }
+
+    @Test
+    void replacePoolFollowsSelectedSpellWhenAnotherSpellRemovedAhead() {
+        ClientInnateState.replacePool(List.of(FIREBALL, ICEBALL, LIGHTNING));
+        ClientInnateState.setSelectedIndex(2);
+        ClientInnateState.replacePool(List.of(FIREBALL, LIGHTNING));
+        assertEquals(LIGHTNING, ClientInnateState.selectedGrant().orElseThrow());
         assertEquals(1, ClientInnateState.selectedIndex());
+    }
+
+    @Test
+    void replacePoolDoesNotSilentlySwapToDifferentSpellAtSameIndex() {
+        ClientInnateState.replacePool(List.of(FIREBALL, ICEBALL, LIGHTNING));
+        ClientInnateState.setSelectedIndex(1);
+        ClientInnateState.replacePool(List.of(FIREBALL, LIGHTNING));
+        assertEquals(FIREBALL, ClientInnateState.selectedGrant().orElseThrow());
     }
 
     @Test

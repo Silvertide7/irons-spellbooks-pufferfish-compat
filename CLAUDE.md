@@ -28,9 +28,9 @@ Unlocking a configured Pufferfish skill grants the player innate access to a spe
 `InnatePool.compose` deduplicates by spell ID and keeps the **highest** level grant. So a player who has unlocked all three skills sees only one Firebolt entry in their pool — at level 3. The lower-level definitions are still useful: they fence the chain (you have to take level 1 to be able to take level 2) and they specify the unlock cost per rank.
 
 Default keybinds (rebindable, chosen to avoid Iron's Spellbooks defaults):
-- **Hold `Z`** — opens the innate spell wheel (radial menu); release to commit the highlighted spell as the new selection.
+- **Hold `C`** — opens the innate spell wheel (radial menu); release to commit the highlighted spell as the new selection.
 - **`X`** — casts the currently selected spell.
-- **Hold `C` + scroll** — cycle through innate spells.
+- **Hold `Z` + scroll** — cycle through innate spells.
 - Toggle-wheel keybind is registered but unbound by default.
 
 A small badge to the left of the hotbar shows only the *currently selected* innate spell (slot frame + spell icon + translucent purple background so it reads as "innate" vs Iron's Spellbooks' own bar). Position is set by `selectedXOffset` / `selectedYOffset` in `config/irons_spellbooks_pufferfish_compat-client.toml`; display mode is `Always` / `Contextual` (fades in on selection-change/cast) / `Never`. The wheel keeps the multi-spell radial layout — only the always-on indicator changed.

@@ -12,7 +12,7 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.client.InnatePayloadHan
 
 @EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID)
 public final class CompatPayloads {
-    public static final String PROTOCOL_VERSION = "1";
+    public static final String PROTOCOL_VERSION = "2";
 
     private CompatPayloads() {}
 
@@ -32,7 +32,7 @@ public final class CompatPayloads {
     private static void onServerReceiveCastInnate(CastInnatePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
-                InnateSpellCaster.castFromClientRequest(serverPlayer, payload.poolIndex());
+                InnateSpellCaster.castFromClientRequest(serverPlayer, payload.spellId());
             }
         });
     }

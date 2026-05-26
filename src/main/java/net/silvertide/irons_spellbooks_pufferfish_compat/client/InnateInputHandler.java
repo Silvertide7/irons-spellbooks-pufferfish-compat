@@ -26,9 +26,10 @@ public final class InnateInputHandler {
         if (Minecraft.getInstance().player == null) return;
 
         while (InnateKeybinds.CAST_INNATE.consumeClick()) {
-            if (ClientInnateState.pool().isEmpty()) continue;
-            PacketDistributor.sendToServer(new CastInnatePayload(ClientInnateState.selectedIndex()));
-            InnateSelectedSpellOverlay.reveal();
+            ClientInnateState.selectedGrant().ifPresent(grant -> {
+                PacketDistributor.sendToServer(new CastInnatePayload(grant.spell()));
+                InnateSelectedSpellOverlay.reveal();
+            });
         }
 
         while (InnateKeybinds.OPEN_WHEEL.consumeClick()) {
@@ -45,8 +46,7 @@ public final class InnateInputHandler {
             } else {
                 InnateSpellWheelOverlay.INSTANCE.open();
             }
-            while (InnateKeybinds.TOGGLE_WHEEL.consumeClick()) {
-            }
+            discardRemainingQueuedClicks(InnateKeybinds.TOGGLE_WHEEL);
         }
 
         if (InnateKeybinds.SCROLL_CYCLE_MODIFIER.isDown()
@@ -80,5 +80,10 @@ public final class InnateInputHandler {
             InnateSpellWheelOverlay.INSTANCE.close();
         }
         wasWheelKeyDown = isDown;
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    private static void discardRemainingQueuedClicks(net.minecraft.client.KeyMapping keymap) {
+        while (keymap.consumeClick()) ;
     }
 }

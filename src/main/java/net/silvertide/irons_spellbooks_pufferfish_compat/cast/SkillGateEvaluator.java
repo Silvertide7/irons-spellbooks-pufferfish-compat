@@ -10,28 +10,26 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.skills.SkillKey;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 
 public final class SkillGateEvaluator {
     private SkillGateEvaluator() {}
 
-    public static boolean blockIfMissingRequiredSkill(
+    public static void blockIfMissingRequiredSkill(
             ServerPlayer player,
             ResourceLocation spellId,
             String denialTranslationKey,
             Runnable cancelEvent
     ) {
         Set<SkillKey> requiredSkills = collectRequiredSkills(spellId);
-        if (requiredSkills.isEmpty()) return false;
+        if (requiredSkills.isEmpty()) return;
 
         for (SkillKey requiredSkill : requiredSkills) {
             if (!PuffishSkillsLookup.hasUnlocked(player, requiredSkill)) {
                 cancelEvent.run();
                 player.displayClientMessage(Component.translatable(denialTranslationKey), true);
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     public static Set<SkillKey> collectRequiredSkills(ResourceLocation spellId) {

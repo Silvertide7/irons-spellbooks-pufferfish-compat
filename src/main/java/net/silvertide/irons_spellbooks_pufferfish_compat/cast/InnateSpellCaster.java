@@ -2,6 +2,7 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.cast;
 
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.api.spells.CastSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat;
@@ -9,7 +10,6 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnatePool;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrant;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpells;
 
-import java.util.List;
 import java.util.Optional;
 
 public final class InnateSpellCaster {
@@ -18,10 +18,12 @@ public final class InnateSpellCaster {
 
     private InnateSpellCaster() {}
 
-    public static void castFromClientRequest(ServerPlayer player, int poolIndex) {
-        List<InnateSpellGrant> pool = InnatePool.currentPool(player);
-        if (poolIndex < 0 || poolIndex >= pool.size()) return;
-        cast(player, pool.get(poolIndex));
+    public static void castFromClientRequest(ServerPlayer player, ResourceLocation requestedSpellId) {
+        Optional<InnateSpellGrant> authoritativeGrant = InnatePool.currentPool(player).stream()
+                .filter(grant -> grant.spell().equals(requestedSpellId))
+                .findFirst();
+        if (authoritativeGrant.isEmpty()) return;
+        cast(player, authoritativeGrant.get());
     }
 
     public static void cast(ServerPlayer player, InnateSpellGrant grant) {
@@ -31,9 +33,10 @@ public final class InnateSpellCaster {
                     "Innate grant references unknown spell '{}'", grant.spell());
             return;
         }
-        resolved.get().attemptInitiateCast(
+        AbstractSpell spell = resolved.get();
+        spell.attemptInitiateCast(
                 ItemStack.EMPTY,
-                grant.level(),
+                InnateSpells.castableLevel(spell, grant.level()),
                 player.serverLevel(),
                 player,
                 INNATE_CAST_SOURCE,

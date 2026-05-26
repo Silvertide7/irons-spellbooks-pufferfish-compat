@@ -101,7 +101,26 @@
       "Bash(javap -p claude_reference/extracted/puffish_skills-0.17.3-1.21-neoforge/net/puffish/skillsmod/reward/builtin/CommandReward.class)",
       "Bash(javap -v -p claude_reference/extracted/puffish_skills-0.17.3-1.21-neoforge/net/puffish/skillsmod/reward/builtin/CommandReward.class)",
       "Bash(grep -iE \"\\\\.log\\(\\\\.|$\\)|^logs/\")",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(xargs -I{} basename {} .class)",
+      "Bash(javap -p net/puffish/skillsmod/server/data/CategoryData.class net/puffish/skillsmod/server/data/PlayerData.class net/puffish/skillsmod/server/data/ServerData.class)",
+      "Bash(javap -p net/puffish/skillsmod/impl/CategoryImpl.class)",
+      "Bash(javap -p -c net/puffish/skillsmod/impl/CategoryImpl.class)",
+      "Bash(javap -p net/puffish/skillsmod/SkillsMod.class)",
+      "Bash(javap -p -c net/puffish/skillsmod/SkillsMod.class)",
+      "Bash(grep -B1 -A 30 'lambda$getUnlockedSkills$56')",
+      "Bash(grep -n 'lambda$getUnlockedSkills' /tmp/skillsmod.javap)",
+      "Bash(javap -p -c net/puffish/skillsmod/server/data/CategoryData.class)",
+      "Bash(javap -p -c net/puffish/skillsmod/server/event/ServerEventListener.class)",
+      "Bash(javap -p -c 'net/puffish/skillsmod/SkillsMod$EventListener.class')",
+      "Bash(find ~ -path \"*1.21*\" -name \"ResourceLocation.java\" 2>/dev/null | head -3)",
+      "Bash(grep -n \"Hold \\\\`Z\\\\`\\\\|Hold \\\\`C\\\\`\\\\|innate spell wheel\\\\|innate spells\\\\|keybind\" /Users/nate/Workspace/minecraft/personal/irons_spellbooks_pufferfish_compat/CLAUDE.md)",
+      "Bash(xargs javap -p)",
+      "Bash(xargs javap -p -c)",
+      "Bash(awk '/public int getMaxLevel/,/^$/')",
+      "Bash(awk '/getLevelFor\\\\\\(int, net.minecraft.world.entity.LivingEntity\\\\\\)/,/^$/')",
+      "Bash(awk '/public boolean attemptInitiateCast/,/^  [a-z]/')",
+      "Bash(awk '/public boolean attemptInitiateCast/{f=1} f{print} /^$/{if\\(f\\)c++} c>=2{exit}')"
     ]
   }
 }

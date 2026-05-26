@@ -36,10 +36,12 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
     private static final int HOTBAR_HALF_WIDTH = 91;
     private static final int HOTBAR_PIXEL_HEIGHT = 22;
     private static final int GAP_FROM_HOTBAR = 2;
-    private static final int INNATE_BACKGROUND_TINT_ARGB = 0xA02D0F4D;
+    private static final float INNATE_BORDER_RED = 0.72f;
+    private static final float INNATE_BORDER_GREEN = 0.45f;
+    private static final float INNATE_BORDER_BLUE = 1.0f;
     private static final float ALPHA_FADE_DENOMINATOR = 20f;
 
-    private volatile int contextualFadeoutTicksRemaining;
+    private int contextualFadeoutTicksRemaining;
     private int lastTickSeen;
     private float alpha = 1f;
 
@@ -86,21 +88,15 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
         int x = defaultX + ClientConfig.SELECTED_X_OFFSET.get();
         int y = defaultY + ClientConfig.SELECTED_Y_OFFSET.get();
 
-        renderTintedBackground(graphics, x, y);
         prepTranslucency();
+        RenderSystem.setShaderColor(INNATE_BORDER_RED, INNATE_BORDER_GREEN, INNATE_BORDER_BLUE, alpha);
         graphics.blit(TEXTURE, x, y, SLOT_BORDER_U, SLOT_BORDER_V, SPRITE_SIZE, SPRITE_SIZE);
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
         graphics.blit(spell.getSpellIconResource(),
                 x + ICON_INNER_OFFSET, y + ICON_INNER_OFFSET,
                 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
         graphics.blit(TEXTURE, x, y, SELECTED_OUTLINE_U, SELECTED_OUTLINE_V, SPRITE_SIZE, SPRITE_SIZE);
         flushTranslucency();
-    }
-
-    private void renderTintedBackground(GuiGraphics graphics, int x, int y) {
-        int tinted = applyAlphaToTint(INNATE_BACKGROUND_TINT_ARGB, alpha);
-        graphics.fill(x + ICON_INNER_OFFSET, y + ICON_INNER_OFFSET,
-                x + ICON_INNER_OFFSET + ICON_SIZE, y + ICON_INNER_OFFSET + ICON_SIZE,
-                tinted);
     }
 
     private void advanceFadeTimer(Player player) {
@@ -109,12 +105,6 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
             if (contextualFadeoutTicksRemaining > 0) contextualFadeoutTicksRemaining--;
         }
         alpha = Mth.clamp(contextualFadeoutTicksRemaining / ALPHA_FADE_DENOMINATOR, 0f, 1f);
-    }
-
-    private static int applyAlphaToTint(int argb, float displayAlpha) {
-        int originalAlpha = (argb >>> 24) & 0xFF;
-        int scaledAlpha = Math.round(originalAlpha * Mth.clamp(displayAlpha, 0f, 1f));
-        return (scaledAlpha << 24) | (argb & 0x00FFFFFF);
     }
 
     private void prepTranslucency() {

@@ -1,6 +1,5 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.client.hud;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
@@ -59,6 +58,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
 
     private boolean active;
     private int wheelSelection;
+    private ResourceLocation pendingCommitSpellId;
 
     private InnateSpellWheelOverlay() {}
 
@@ -70,16 +70,28 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
         if (ClientInnateState.pool().isEmpty()) return;
         active = true;
         wheelSelection = -1;
+        pendingCommitSpellId = null;
         Minecraft.getInstance().mouseHandler.releaseMouse();
     }
 
     public void close() {
         active = false;
-        if (wheelSelection >= 0) {
-            ClientInnateState.setSelectedIndex(wheelSelection);
+        if (pendingCommitSpellId != null) {
+            commitSelectionBySpellId(pendingCommitSpellId);
             InnateSelectedSpellOverlay.reveal();
+            pendingCommitSpellId = null;
         }
         Minecraft.getInstance().mouseHandler.grabMouse();
+    }
+
+    private static void commitSelectionBySpellId(ResourceLocation spellId) {
+        List<InnateSpellGrant> currentPool = ClientInnateState.pool();
+        for (int i = 0; i < currentPool.size(); i++) {
+            if (currentPool.get(i).spell().equals(spellId)) {
+                ClientInnateState.setSelectedIndex(i);
+                return;
+            }
+        }
     }
 
     @Override
@@ -95,7 +107,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
 
         List<InnateSpellGrant> pool = ClientInnateState.pool();
         int totalSpells = pool.size();
-        if (totalSpells <= 0) {
+        if (totalSpells == 0) {
             close();
             return;
         }
@@ -135,6 +147,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
         if (mousePos.distanceToSqr(screenCenterPhysical) < RING_DEAD_ZONE_RADIUS * RING_DEAD_ZONE_RADIUS) {
             wheelSelection = Mth.clamp(ClientInnateState.selectedIndex(), 0, totalSpells - 1);
         }
+        pendingCommitSpellId = pool.get(wheelSelection).spell();
 
         graphics.fill(0, 0, screenWidth, screenHeight, 0);
 
@@ -192,7 +205,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
         if (resolved.isEmpty()) return;
         AbstractSpell spell = resolved.get();
 
-        int effectiveLevel = spell.getLevelFor(grant.level(), player);
+        int effectiveLevel = spell.getLevelFor(InnateSpells.castableLevel(spell, grant.level()), player);
         List<MutableComponent> uniqueInfo = spell.getUniqueInfo(effectiveLevel, player);
         int infoLineCount = Math.max(3, uniqueInfo.size());
         int textBlockHeight = infoLineCount * font.lineHeight + 5;
