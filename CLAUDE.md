@@ -4,16 +4,25 @@ NeoForge 1.21.1 mod that bridges Iron's Spells 'n Spellbooks and Pufferfish's Sk
 
 ## Features
 
-### 1. Skill-gated casting + inscribing (`spell_skill_requirements/` and `skill_blocks/`)
+### 1. Skill-gated casting + inscribing (`spell_skill_requirements/`)
 
 Block a spell cast OR inscription when the player has not unlocked one or more configured Pufferfish skills. The gate fires for every cast source (SPELLBOOK, SCROLL, SWORD, COMMAND, …) since all funnel through `AbstractSpell.attemptInitiateCast`, and separately for `InscribeSpellEvent` at the inscription table.
 
-**Two authoring shapes feed the same gate** — both contribute to the set of skills the player must have unlocked:
+**One authoring shape — a rule that groups spells with the skills they require.** Drop `data/<pack>/spell_skill_requirements/<arbitrary>.json`:
 
-- **Per-spell** (one spell → one required skill): drop `data/<pack>/spell_skill_requirements/<arbitrary>.json` with `{"spell": "<ns>:<id>", "category": "<cat>", "skill": "<skill_id>"}`. The file path is organizational; the spell ID lives inside the JSON.
-- **Per-skill** (one skill → many blocked spells): drop `data/<pack>/skill_blocks/<arbitrary>.json` with `{"category": "<cat>", "skill": "<skill_id>", "blocks": ["spell_a", "spell_b", ...]}`.
+```json
+{
+  "spells": ["irons_spellbooks:fire_arrow", "irons_spellbooks:fire_breath"],
+  "requires": [
+    {"category": "<cat>", "skill": "<skill_id>"},
+    {"category": "<cat>", "skill": "<skill_id_2>"}
+  ]
+}
+```
 
-If a spell appears in either store, the player needs every listed skill (AND semantics) to cast or inscribe it. No mapping → no gate (opt-in).
+Semantics: *every spell in `spells` requires every skill in `requires`* (AND). The file path is organizational; the spell IDs live inside the JSON. Multiple rules that name the same spell are unioned, so a spell ends up requiring the union of every rule's `requires`. No rule names a spell → no gate for it (opt-in).
+
+This one format covers both directions: "one skill gates many spells" (many `spells`, one entry in `requires`) and "one spell needs many skills" (one spell, many `requires`).
 
 ### 2. Innate spells (`innate_spells/`)
 
@@ -33,7 +42,7 @@ Default keybinds (rebindable, chosen to avoid Iron's Spellbooks defaults):
 - **Hold `Z` + scroll** — cycle through innate spells.
 - Toggle-wheel keybind is registered but unbound by default.
 
-A small badge to the left of the hotbar shows only the *currently selected* innate spell (slot frame + spell icon + translucent purple background so it reads as "innate" vs Iron's Spellbooks' own bar). Position is set by `selectedXOffset` / `selectedYOffset` in `config/irons_spellbooks_pufferfish_compat-client.toml`; display mode is `Always` / `Contextual` (fades in on selection-change/cast) / `Never`. The wheel keeps the multi-spell radial layout — only the always-on indicator changed.
+A small badge to the left of the hotbar shows only the *currently selected* innate spell (slot frame + spell icon, drawn from the mod's `icons.png` atlas). Position is set by `selectedXOffset` / `selectedYOffset` in `config/irons_spellbooks_pufferfish_compat-client.toml`; display mode is `Always` / `Contextual` (fades in on selection-change/cast) / `Never`. The wheel keeps the multi-spell radial layout — only the always-on indicator changed.
 
 ### Planned (not implemented yet)
 
@@ -42,9 +51,7 @@ A small badge to the left of the hotbar shows only the *currently selected* inna
 ## How feature 1 (the gate) works
 
 1. `SpellPreCastEvent` (cancellable, all cast sources) and `InscribeSpellEvent` (cancellable, inscription table) fire server-side.
-2. Both gates call `SpellCastGate.collectRequiredSkills(spellId)` which unions:
-   - the `SkillKey` from `SpellSkillRequirements.findForSpell(spellId)` (if any), and
-   - the `Set<SkillKey>` from `SpellSkillBlocks.blockersFor(spellId)` (skills that declared they block this spell).
+2. Both gates call `SkillGateEvaluator.collectRequiredSkills(spellId)`, which returns `SpellSkillRequirements.INSTANCE.requiredSkillsFor(spellId)` — the union of every rule's `requires` for that spell.
 3. For each `SkillKey` in the set, `PuffishSkillsLookup.hasUnlocked(player, skillKey)` asks Pufferfish.
 4. First unmet skill → `event.setCanceled(true)` + action-bar message. All satisfied → cast/inscribe proceeds.
 
@@ -62,7 +69,7 @@ Client side:
 2. `InnateKeybinds` registers four `KeyMapping`s (`OPEN_WHEEL` hold, `TOGGLE_WHEEL`, `CAST_INNATE`, `SCROLL_CYCLE_MODIFIER` hold).
 3. `InnateInputHandler` (`ClientTickEvent.Post` + `InputEvent.MouseScrollingEvent`) handles all of it: drains cast clicks → sends packet, hold-to-open + release-to-commit on the wheel key, scroll-while-modifier cycles selection, toggle key flips the wheel.
 4. `InnateHudLayers` (`RegisterGuiLayersEvent`) registers two overlays above all vanilla layers:
-   - `InnateSelectedSpellOverlay` — single-slot badge for the currently selected innate spell. Default position is the slot immediately left of the hotbar's first item slot; configurable via `selectedXOffset` / `selectedYOffset`. Draws a translucent purple fill behind the spell icon as the visual cue that this is "innate" (distinguishes from ISS's bar).
+   - `InnateSelectedSpellOverlay` — single-slot badge for the currently selected innate spell (slot frame + spell icon + selected-outline ring, blitted from `icons.png`). Default position is the slot immediately left of the hotbar's first item slot; configurable via `selectedXOffset` / `selectedYOffset`.
    - `InnateSpellWheelOverlay` — radial menu with mouse-cursor wedge selection, spell info text (name, level, mana, unique effects). Ported from `SpellWheelOverlay`. Mouse is released on open and re-grabbed on close.
 
 The atlas at `assets/irons_spellbooks_pufferfish_compat/textures/gui/icons.png` is a verbatim copy of ISS's `icons.png` (CC-BY-4.0, see CREDITS.md). The cooldown overlay on the wheel is **not** ported because read APIs for `ClientMagicData.getCooldownPercent` live outside the `:api` classifier.
@@ -74,12 +81,10 @@ Why a 1Hz tick poll and not Pufferfish's `SkillUnlock` event? Pufferfish's API e
 ```
 IronsSpellbooksPufferfishCompat   bootstrap; registers reload listeners
 
-requirement/SpellSkillRequirement      record: (category, skill) + Codec
-requirement/SpellSkillRequirements     SimpleJsonResourceReloadListener at spell_skill_requirements/
-requirement/SkillBlockedSpells         record: (blockingSkill: SkillKey, blockedSpells: List<ResourceLocation>) + Codec
-requirement/SpellSkillBlocks           SimpleJsonResourceReloadListener at skill_blocks/; inverts files into Map<spell, Set<SkillKey>>
+requirement/SpellSkillRequirement      record: (spells: List<ResourceLocation>, requiredSkills: List<SkillKey>) + Codec
+requirement/SpellSkillRequirements     SimpleJsonResourceReloadListener at spell_skill_requirements/; fans each rule out into Map<spell, Set<SkillKey>> (union across rules)
 
-skills/SkillKey                  record: (category: ResourceLocation, skill: String)
+skills/SkillKey                  record: (category: ResourceLocation, skill: String) + Codec
 innate/InnateSpellGrant          record: (spell, level) + Codec + StreamCodec
 innate/InnateSpellGrants         SimpleJsonResourceReloadListener at innate_spells/, keyed by SkillKey
 innate/InnatePool                composes a ServerPlayer's current pool from grants + Pufferfish state; dedupes by spell, keeps highest level
@@ -87,11 +92,12 @@ innate/InnatePool                composes a ServerPlayer's current pool from gra
 skills/PuffishSkillsLookup       isolates Pufferfish API: hasUnlocked(player, SkillKey)
 skills/InnateSyncBootstrap       login + tick-driven pool sync to clients
 
-cast/SpellCastGate               SpellPreCastEvent handler (the cast gate); owns collectRequiredSkills
-cast/SpellInscribeGate           InscribeSpellEvent handler (the inscribe gate); reuses collectRequiredSkills
-cast/InnateSpellCaster           server-side: attemptInitiateCast with ItemStack.EMPTY
+cast/SkillGateEvaluator          shared gate logic; owns collectRequiredSkills + blockIfMissingRequiredSkill
+cast/SpellCastGate               SpellPreCastEvent handler (the cast gate); delegates to SkillGateEvaluator
+cast/SpellInscribeGate           InscribeSpellEvent handler (the inscribe gate); delegates to SkillGateEvaluator
+cast/InnateSpellCaster           server-side: attemptInitiateCast with ItemStack.EMPTY; clamps grant level to the spell's range
 
-network/CastInnatePayload        C→S: cast at pool index
+network/CastInnatePayload        C→S: cast the named spell (server re-derives the authoritative pool)
 network/InnatePoolPayload        S→C: full pool snapshot
 network/CompatPayloads           payload registration on the MOD bus
 
@@ -128,7 +134,7 @@ Each cross-mod call lives in exactly one class: Iron's Spellbooks goes through `
 
 ## Composition gotcha
 
-If a spell is BOTH in `spell_skill_requirements/` AND granted by an entry in `innate_spells/`, the gate still runs. A player who innately unlocked the spell via skill A but the gate requires skill B will still be blocked. If you want innate-access to imply gate-satisfied, either point both files at the same skill, or rely solely on the gate (the absence of a grant just means the spell needs a spellbook to ignite).
+If a spell is BOTH in `spell_skill_requirements/` AND granted by an entry in `innate_spells/`, the gate still runs. A player who innately unlocked the spell via skill A but the gate requires skill B will still be blocked. If you want innate-access to imply gate-satisfied, either point the requirement rule at the same skill that grants it, or rely solely on the gate (the absence of a grant just means the spell needs a spellbook to ignite).
 
 ## Reference
 

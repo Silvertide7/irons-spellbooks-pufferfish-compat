@@ -36,9 +36,6 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
     private static final int HOTBAR_HALF_WIDTH = 91;
     private static final int HOTBAR_PIXEL_HEIGHT = 22;
     private static final int GAP_FROM_HOTBAR = 2;
-    private static final float INNATE_BORDER_RED = 0.72f;
-    private static final float INNATE_BORDER_GREEN = 0.45f;
-    private static final float INNATE_BORDER_BLUE = 1.0f;
     private static final float ALPHA_FADE_DENOMINATOR = 20f;
 
     private int contextualFadeoutTicksRemaining;
@@ -89,9 +86,7 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
         int y = defaultY + ClientConfig.SELECTED_Y_OFFSET.get();
 
         prepTranslucency();
-        RenderSystem.setShaderColor(INNATE_BORDER_RED, INNATE_BORDER_GREEN, INNATE_BORDER_BLUE, alpha);
         graphics.blit(TEXTURE, x, y, SLOT_BORDER_U, SLOT_BORDER_V, SPRITE_SIZE, SPRITE_SIZE);
-        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
         graphics.blit(spell.getSpellIconResource(),
                 x + ICON_INNER_OFFSET, y + ICON_INNER_OFFSET,
                 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);

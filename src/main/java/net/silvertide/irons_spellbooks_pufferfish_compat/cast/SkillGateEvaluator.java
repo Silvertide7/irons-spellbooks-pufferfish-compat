@@ -3,12 +3,10 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.cast;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.silvertide.irons_spellbooks_pufferfish_compat.requirement.SpellSkillBlocks;
 import net.silvertide.irons_spellbooks_pufferfish_compat.requirement.SpellSkillRequirements;
 import net.silvertide.irons_spellbooks_pufferfish_compat.skills.PuffishSkillsLookup;
 import net.silvertide.irons_spellbooks_pufferfish_compat.skills.SkillKey;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public final class SkillGateEvaluator {
@@ -33,9 +31,6 @@ public final class SkillGateEvaluator {
     }
 
     public static Set<SkillKey> collectRequiredSkills(ResourceLocation spellId) {
-        Set<SkillKey> requiredSkills = new HashSet<>();
-        SpellSkillRequirements.INSTANCE.findForSpell(spellId).ifPresent(requiredSkills::add);
-        requiredSkills.addAll(SpellSkillBlocks.INSTANCE.blockersFor(spellId));
-        return requiredSkills;
+        return SpellSkillRequirements.INSTANCE.requiredSkillsFor(spellId);
     }
 }

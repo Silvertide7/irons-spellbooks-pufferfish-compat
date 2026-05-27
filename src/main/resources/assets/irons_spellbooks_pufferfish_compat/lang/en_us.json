@@ -1,6 +1,6 @@
 {
-  "message.irons_spellbooks_pufferfish_compat.skill_required": "You haven't learned this spell yet.",
-  "message.irons_spellbooks_pufferfish_compat.skill_required_inscribe": "You haven't learned enough to inscribe this spell.",
+  "message.irons_spellbooks_pufferfish_compat.skill_required": "You don't have the skill required to cast that.",
+  "message.irons_spellbooks_pufferfish_compat.skill_required_inscribe": "You don't have the skill required to inscribe that.",
 
   "key.categories.irons_spellbooks_pufferfish_compat": "Iron's Spellbooks ↔ Pufferfish",
   "key.irons_spellbooks_pufferfish_compat.open_wheel": "Open innate spell wheel (hold)",

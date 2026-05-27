@@ -11,14 +11,15 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfi
 import net.silvertide.irons_spellbooks_pufferfish_compat.skills.SkillKey;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 public final class SpellSkillRequirements extends SimpleJsonResourceReloadListener {
     public static final String DATAPACK_DIRECTORY = "spell_skill_requirements";
     public static final SpellSkillRequirements INSTANCE = new SpellSkillRequirements();
 
-    private volatile Map<ResourceLocation, SkillKey> requiredSkillBySpell = Map.of();
+    private volatile Map<ResourceLocation, Set<SkillKey>> requiredSkillsBySpell = Map.of();
 
     private SpellSkillRequirements() {
         super(new Gson(), DATAPACK_DIRECTORY);
@@ -26,29 +27,29 @@ public final class SpellSkillRequirements extends SimpleJsonResourceReloadListen
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> rawEntries, ResourceManager resourceManager, ProfilerFiller profiler) {
-        requiredSkillBySpell = parseAll(rawEntries);
+        requiredSkillsBySpell = parseAll(rawEntries);
     }
 
-    public Optional<SkillKey> findForSpell(ResourceLocation spellId) {
-        return Optional.ofNullable(requiredSkillBySpell.get(spellId));
+    public Set<SkillKey> requiredSkillsFor(ResourceLocation spellId) {
+        return requiredSkillsBySpell.getOrDefault(spellId, Set.of());
     }
 
-    static Map<ResourceLocation, SkillKey> parseAll(Map<ResourceLocation, JsonElement> rawEntries) {
-        Map<ResourceLocation, SkillKey> parsed = new HashMap<>();
+    static Map<ResourceLocation, Set<SkillKey>> parseAll(Map<ResourceLocation, JsonElement> rawEntries) {
+        Map<ResourceLocation, Set<SkillKey>> requiredSkillsBySpell = new HashMap<>();
         for (Map.Entry<ResourceLocation, JsonElement> entry : rawEntries.entrySet()) {
             ResourceLocation fileId = entry.getKey();
             SpellSkillRequirement.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
                     .resultOrPartial(error -> IronsSpellbooksPufferfishCompat.LOGGER.warn(
-                            "Skipping malformed spell_skill_requirement {}: {}", fileId, error))
-                    .ifPresent(requirement -> {
-                        SkillKey previous = parsed.put(requirement.spell(), requirement.requiredSkill());
-                        if (previous != null) {
-                            IronsSpellbooksPufferfishCompat.LOGGER.warn(
-                                    "Duplicate spell_skill_requirement for spell {} - file {} overrode previous entry",
-                                    requirement.spell(), fileId);
+                            "Skipping malformed spell_skill_requirements file {}: {}", fileId, error))
+                    .ifPresent(rule -> {
+                        for (ResourceLocation spell : rule.spells()) {
+                            requiredSkillsBySpell
+                                    .computeIfAbsent(spell, key -> new HashSet<>())
+                                    .addAll(rule.requiredSkills());
                         }
                     });
         }
-        return Map.copyOf(parsed);
+        requiredSkillsBySpell.replaceAll((spellId, skills) -> Set.copyOf(skills));
+        return Map.copyOf(requiredSkillsBySpell);
     }
 }

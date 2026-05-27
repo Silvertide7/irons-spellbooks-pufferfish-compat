@@ -8,7 +8,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.ClientConfig;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrants;
-import net.silvertide.irons_spellbooks_pufferfish_compat.requirement.SpellSkillBlocks;
 import net.silvertide.irons_spellbooks_pufferfish_compat.requirement.SpellSkillRequirements;
 import org.slf4j.Logger;
 
@@ -24,7 +23,6 @@ public class IronsSpellbooksPufferfishCompat {
 
     private static void registerReloadListeners(AddReloadListenerEvent event) {
         event.addListener(SpellSkillRequirements.INSTANCE);
-        event.addListener(SpellSkillBlocks.INSTANCE);
         event.addListener(InnateSpellGrants.INSTANCE);
     }
 }

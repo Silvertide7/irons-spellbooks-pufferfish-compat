@@ -120,7 +120,14 @@
       "Bash(awk '/public int getMaxLevel/,/^$/')",
       "Bash(awk '/getLevelFor\\\\\\(int, net.minecraft.world.entity.LivingEntity\\\\\\)/,/^$/')",
       "Bash(awk '/public boolean attemptInitiateCast/,/^  [a-z]/')",
-      "Bash(awk '/public boolean attemptInitiateCast/{f=1} f{print} /^$/{if\\(f\\)c++} c>=2{exit}')"
+      "Bash(awk '/public boolean attemptInitiateCast/{f=1} f{print} /^$/{if\\(f\\)c++} c>=2{exit}')",
+      "Bash(sed -n '1,40p' SpellSkillRequirement.java)",
+      "Bash(sed -n '1,40p' SkillBlockedSpells.java)",
+      "Bash(rm -rf skill_blocks)",
+      "Bash(rm spell_skill_requirements/fireball.json spell_skill_requirements/cone_of_cold.json)",
+      "Bash(javap -p net/puffish/skillsmod/api/Skill.class)",
+      "Bash(javap -p net/puffish/skillsmod/api/Category.class)",
+      "Bash(xargs cat)"
     ]
   }
 }

@@ -5,11 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.silvertide.irons_spellbooks_pufferfish_compat.skills.SkillKey;
 
-public record SpellSkillRequirement(ResourceLocation spell, SkillKey requiredSkill) {
+import java.util.List;
+
+public record SpellSkillRequirement(List<ResourceLocation> spells, List<SkillKey> requiredSkills) {
     public static final Codec<SpellSkillRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("spell").forGetter(SpellSkillRequirement::spell),
-            ResourceLocation.CODEC.fieldOf("category").forGetter(r -> r.requiredSkill().category()),
-            Codec.STRING.fieldOf("skill").forGetter(r -> r.requiredSkill().skill())
-    ).apply(instance, (spell, category, skill) ->
-            new SpellSkillRequirement(spell, new SkillKey(category, skill))));
+            ResourceLocation.CODEC.listOf().fieldOf("spells").forGetter(SpellSkillRequirement::spells),
+            SkillKey.CODEC.listOf().fieldOf("requires").forGetter(SpellSkillRequirement::requiredSkills)
+    ).apply(instance, SpellSkillRequirement::new));
 }
