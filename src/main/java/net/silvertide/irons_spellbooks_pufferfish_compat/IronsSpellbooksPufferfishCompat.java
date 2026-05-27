@@ -9,6 +9,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.ClientConfig;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrants;
 import net.silvertide.irons_spellbooks_pufferfish_compat.requirement.SpellSkillRequirements;
+import net.silvertide.irons_spellbooks_pufferfish_compat.skills.InnateSyncBootstrap;
 import org.slf4j.Logger;
 
 @Mod(IronsSpellbooksPufferfishCompat.MODID)
@@ -19,6 +20,7 @@ public class IronsSpellbooksPufferfishCompat {
     public IronsSpellbooksPufferfishCompat(ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         NeoForge.EVENT_BUS.addListener(IronsSpellbooksPufferfishCompat::registerReloadListeners);
+        InnateSyncBootstrap.registerSkillChangeListeners();
     }
 
     private static void registerReloadListeners(AddReloadListenerEvent event) {

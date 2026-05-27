@@ -60,8 +60,8 @@ A small badge to the left of the hotbar shows only the *currently selected* inna
 Server side:
 
 1. `InnateSpellGrants` (datapack reload listener) holds a `Map<SkillKey, InnateSpellGrant>` parsed from `innate_spells/*.json`.
-2. `InnateSyncBootstrap` recomputes each player's pool on login and once per second (`ServerTickEvent.Post`), pushing `InnatePoolPayload` only when the pool's hash changes.
-3. The client press of the cast keybind sends a `CastInnatePayload(poolIndex)`. The server re-derives the pool (authoritative), looks up the grant, and calls `AbstractSpell.attemptInitiateCast(ItemStack.EMPTY, level, world, player, CastSource.SPELLBOOK, true, "innate")`.
+2. `InnateSyncBootstrap` recomputes each player's pool and pushes `InnatePoolPayload` only when the pool changes (value equality against the last snapshot sent). It recomputes on three triggers: player login; Pufferfish's `SkillsAPI` unlock/lock events (resync **all** online players, since the event carries no player — deferred onto the server thread via `server.execute`); and a 10-second safety-net tick poll (`ServerTickEvent.Post`, `RESYNC_INTERVAL_TICKS = 200`) that catches change sources the events miss (category resets/respec, `setPointsSilently`, programmatic mutations).
+3. The client press of the cast keybind sends a `CastInnatePayload(spellId)`. The server re-derives the pool (authoritative), confirms the requested spell is in it, and calls `AbstractSpell.attemptInitiateCast(ItemStack.EMPTY, level, world, player, CastSource.SPELLBOOK, true, "innate")` with the level clamped to the spell's range.
 
 Client side:
 
@@ -74,7 +74,7 @@ Client side:
 
 The atlas at `assets/irons_spellbooks_pufferfish_compat/textures/gui/icons.png` is a verbatim copy of ISS's `icons.png` (CC-BY-4.0, see CREDITS.md). The cooldown overlay on the wheel is **not** ported because read APIs for `ClientMagicData.getCooldownPercent` live outside the `:api` classifier.
 
-Why a 1Hz tick poll and not Pufferfish's `SkillUnlock` event? Pufferfish's API exposes the event signature as `(ResourceLocation category, String skill)` — the player isn't passed, so a targeted push from the callback isn't possible. The tick poll diffs against a per-player hash cache, so it's cheap and catches every change source (GUI clicks, `/puffish_skills` commands, programmatic unlocks).
+Why event-driven **plus** a slow poll? Pufferfish's `SkillUnlock`/`SkillLock` events fire `(ResourceLocation category, String skill)` with no player, so we can't target a push — but they're rare, so on each event we just resync every online player (the diff-cache suppresses redundant packets). The events are not complete, though: category resets/respec and the `*Silently` point-mutation methods fire no event (confirmed in bytecode — `resetSkills` calls `updateRewards`/`showCategory` directly). The 10-second poll is the safety net that catches those. Recompute cost is bounded by `InnateSpellGrants.grantingSkills()` (datapack-defined, small), not by tree size or how much the player has unlocked. (If Pufferfish merges a reset event + player-carrying signatures, the poll can be dropped entirely.)
 
 ## Architecture
 
@@ -90,7 +90,7 @@ innate/InnateSpellGrants         SimpleJsonResourceReloadListener at innate_spel
 innate/InnatePool                composes a ServerPlayer's current pool from grants + Pufferfish state; dedupes by spell, keeps highest level
 
 skills/PuffishSkillsLookup       isolates Pufferfish API: hasUnlocked(player, SkillKey)
-skills/InnateSyncBootstrap       login + tick-driven pool sync to clients
+skills/InnateSyncBootstrap       pool sync to clients: login + SkillsAPI unlock/lock events + 10s safety-net poll, diff-gated
 
 cast/SkillGateEvaluator          shared gate logic; owns collectRequiredSkills + blockIfMissingRequiredSkill
 cast/SpellCastGate               SpellPreCastEvent handler (the cast gate); delegates to SkillGateEvaluator

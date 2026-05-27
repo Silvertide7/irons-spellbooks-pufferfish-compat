@@ -15,6 +15,7 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.skills.SkillKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public final class InnateSpellGrants extends SimpleJsonResourceReloadListener {
     public static final String DATAPACK_DIRECTORY = "innate_spells";
@@ -44,6 +45,10 @@ public final class InnateSpellGrants extends SimpleJsonResourceReloadListener {
 
     public Optional<InnateSpellGrant> findForSkill(SkillKey skillKey) {
         return Optional.ofNullable(grantsBySkill.get(skillKey));
+    }
+
+    public Set<SkillKey> grantingSkills() {
+        return grantsBySkill.keySet();
     }
 
     static Map<SkillKey, InnateSpellGrant> parseAll(Map<ResourceLocation, JsonElement> rawEntries) {
