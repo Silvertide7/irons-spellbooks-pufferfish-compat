@@ -127,7 +127,13 @@
       "Bash(rm spell_skill_requirements/fireball.json spell_skill_requirements/cone_of_cold.json)",
       "Bash(javap -p net/puffish/skillsmod/api/Skill.class)",
       "Bash(javap -p net/puffish/skillsmod/api/Category.class)",
-      "Bash(xargs cat)"
+      "Bash(xargs cat)",
+      "Bash(awk '/private void lambda\\\\$resetSkills/,/^$/')",
+      "Bash(awk '/void update/,/^$/')",
+      "Bash(awk '/public.*void update/,/^$/')",
+      "Bash(python3 -c 'import json,sys; json.load\\(open\\('\\\\''__TRACKED_VAR__'\\\\''\\)\\); print\\('\\\\''OK  __TRACKED_VAR__'\\\\''\\)')",
+      "Bash(awk '/private void lambda\\\\$lockSkill\\\\$24/,/^$/')",
+      "Bash(awk '/private void lambda\\\\$resetSkills\\\\$26/,/^$/')"
     ]
   }
 }
