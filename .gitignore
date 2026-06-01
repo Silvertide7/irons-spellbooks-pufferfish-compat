@@ -40,3 +40,4 @@ repo/
 !**/src/**/repo/
 logs/
 claude_reference/
+.claude
