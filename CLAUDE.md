@@ -74,9 +74,7 @@ Client side:
 
 The atlas at `assets/irons_spellbooks_pufferfish_compat/textures/gui/icons.png` is a verbatim copy of ISS's `icons.png` (CC-BY-4.0, see CREDITS.md). The cooldown overlay on the wheel is **not** ported because read APIs for `ClientMagicData.getCooldownPercent` live outside the `:api` classifier.
 
-Why purely event-driven (no poll)? Pufferfish's `SkillUnlock`/`SkillLock` events now fire `(ServerPlayer player, ResourceLocation category, String skill)` and `resetSkills` emits a lock event per skill it locks, so the events are both player-targeted and complete — a respec arrives as a burst of lock events, each correctly attributed. We react only to the affected player, and only when the changed skill grants an innate spell, so the per-event cost is O(1)-ish (a `Set.contains`) and recompute happens just for the one player. `OnDatapackSyncEvent` covers login and `/reload`. The earlier 1Hz/10s tick poll was a workaround for the old eventless reset path and the missing player; both are gone now, so the poll was removed. (Requires the Pufferfish release that carries these event changes — see "Pending upstream" below.)
-
-**Pending upstream:** this builds against a local pre-release Pufferfish jar (`claude_reference/puffish_skills-*.jar`) wired via `files(...)` in `build.gradle`. When that release publishes: (1) restore the `curse.maven` `compileOnly`/`localRuntime` lines in `build.gradle` with the new file id, and (2) bump the `puffish_skills` `versionRange` floor in `neoforge.mods.toml` to that release — the new event signatures are not present in 0.17.3, so loading against an older Pufferfish would fail at runtime.
+Why purely event-driven (no poll)? Pufferfish 0.18.0+ fires `SkillUnlock`/`SkillLock` as `(ServerPlayer player, ResourceLocation category, String skill)` and `resetSkills` emits a lock event per skill it locks, so the events are both player-targeted and complete — a respec arrives as a burst of lock events, each correctly attributed. We react only to the affected player, and only when the changed skill grants an innate spell, so the per-event cost is O(1)-ish (a `Set.contains`) and recompute happens just for the one player. `OnDatapackSyncEvent` covers login and `/reload`. The `puffish_skills` floor in `neoforge.mods.toml` is set to `[0.18,)` so older Pufferfish loads are rejected cleanly at the load screen rather than crashing on the first event.
 
 ## Architecture
 
@@ -168,5 +166,6 @@ When asked to review code, do a "pass", check for issues, or otherwise audit a r
 
 1. **Self-audit first.** Read the diff yourself. Fix the obvious — dead code, comments, naming, anything that violates the Code Style rules above. Report findings.
 2. **Then spawn an independent reviewer** via the `/code-review` skill or a fresh agent. Give it only the diff and the goal, no context about why you made the choices you did. That catches the bugs you would otherwise rationalize away.
+3. **Project Problems check** by running a whole project search in the problems / project tab. Have the user download and put this file into the root as a file called  to check. Ask before deploys if we should do this.
 
 Don't skip step 2 because step 1 looked clean — the value of the independent reviewer is exactly that it doesn't share your blind spots.

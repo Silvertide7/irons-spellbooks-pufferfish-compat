@@ -133,7 +133,17 @@
       "Bash(awk '/public.*void update/,/^$/')",
       "Bash(python3 -c 'import json,sys; json.load\\(open\\('\\\\''__TRACKED_VAR__'\\\\''\\)\\); print\\('\\\\''OK  __TRACKED_VAR__'\\\\''\\)')",
       "Bash(awk '/private void lambda\\\\$lockSkill\\\\$24/,/^$/')",
-      "Bash(awk '/private void lambda\\\\$resetSkills\\\\$26/,/^$/')"
+      "Bash(awk '/private void lambda\\\\$resetSkills\\\\$26/,/^$/')",
+      "Bash(xargs -I{} unzip -p {} META-INF/neoforge.mods.toml)",
+      "Bash(sed -n '20,30p' src/main/java/net/silvertide/irons_spellbooks_pufferfish_compat/innate/InnatePool.java)",
+      "Bash(sed -n '1,8p;96,100p' src/main/java/net/silvertide/irons_spellbooks_pufferfish_compat/client/hud/InnateSpellWheelOverlay.java)",
+      "Bash(sed -n '19,23p' src/main/java/net/silvertide/irons_spellbooks_pufferfish_compat/IronsSpellbooksPufferfishCompat.java)",
+      "Bash(sed -n '18,30p' src/main/java/net/silvertide/irons_spellbooks_pufferfish_compat/innate/InnatePool.java)",
+      "Bash(sed -n '18,24p' src/main/java/net/silvertide/irons_spellbooks_pufferfish_compat/IronsSpellbooksPufferfishCompat.java)",
+      "Bash(sed -n '45,65p' src/main/java/net/silvertide/irons_spellbooks_pufferfish_compat/client/ClientInnateState.java)",
+      "Bash(grep -oE 'file://\\\\$PROJECT_DIR\\\\$/[^<\"]*' claude_reference/problems/__TRACKED_VAR__.xml)",
+      "Bash(python3 -)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

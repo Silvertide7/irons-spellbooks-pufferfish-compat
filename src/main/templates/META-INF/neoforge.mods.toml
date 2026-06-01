@@ -98,7 +98,7 @@ Adds the ability to gate spell casts behind having a skill, and other spell bene
 [[dependencies.${mod_id}]]
     modId="puffish_skills"
     type="required"
-    versionRange="[0.17,)"
+    versionRange="[0.18,)"
     ordering="AFTER"
     side="BOTH"
 

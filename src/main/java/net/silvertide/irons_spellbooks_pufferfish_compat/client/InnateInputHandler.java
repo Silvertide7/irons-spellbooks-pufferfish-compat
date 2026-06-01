@@ -46,7 +46,7 @@ public final class InnateInputHandler {
             } else {
                 InnateSpellWheelOverlay.INSTANCE.open();
             }
-            discardRemainingQueuedClicks(InnateKeybinds.TOGGLE_WHEEL);
+            drainRemainingToggleWheelClicks();
         }
 
         if (InnateKeybinds.SCROLL_CYCLE_MODIFIER.isDown()
@@ -83,7 +83,7 @@ public final class InnateInputHandler {
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    private static void discardRemainingQueuedClicks(net.minecraft.client.KeyMapping keymap) {
-        while (keymap.consumeClick()) ;
+    private static void drainRemainingToggleWheelClicks() {
+        while (InnateKeybinds.TOGGLE_WHEEL.consumeClick()) ;
     }
 }

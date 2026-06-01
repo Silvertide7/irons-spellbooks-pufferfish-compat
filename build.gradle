@@ -153,6 +153,7 @@ dependencies {
     // PUFFERFISH'S SKILLS — compile against the public API, run with the full mod
     compileOnly  "curse.maven:puffish-skills-835091:${pufferfish_version}"
     localRuntime "curse.maven:puffish-skills-835091:${pufferfish_version}"
+
     // IRON'S SPELLBOOKS RUNTIME PREREQUISITES — required by ISS at load time, never referenced in our code
     localRuntime "io.redspace:irons_lib:${irons_lib_version}"
     localRuntime "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
