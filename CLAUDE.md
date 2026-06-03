@@ -60,7 +60,7 @@ A small badge to the left of the hotbar shows only the *currently selected* inna
 Server side:
 
 1. `InnateSpellGrants` (datapack reload listener) holds a `Map<SkillKey, InnateSpellGrant>` parsed from `innate_spells/*.json`.
-2. `InnateSyncBootstrap` recomputes each player's pool and pushes `InnatePoolPayload` only when the pool changes (value equality against the last snapshot sent). It recomputes on three triggers: player login; Pufferfish's `SkillsAPI` unlock/lock events (resync **all** online players, since the event carries no player — deferred onto the server thread via `server.execute`); and a 10-second safety-net tick poll (`ServerTickEvent.Post`, `RESYNC_INTERVAL_TICKS = 200`) that catches change sources the events miss (category resets/respec, `setPointsSilently`, programmatic mutations).
+2. `InnateSyncBootstrap` recomputes a player's pool and pushes `InnatePoolPayload` only when the pool changes (value equality against the last snapshot sent). It recomputes on two triggers: Pufferfish's `SkillsAPI` unlock/lock events — targeted to the affected player (the event carries the `ServerPlayer`) and gated to skills that actually grant an innate spell (`InnateSpellGrants.grantingSkills().contains(skillKey)`), so unrelated skill changes cost nothing; and `OnDatapackSyncEvent`, which fires on login (syncs the joining player) and on `/reload` (resyncs all online players, catching innate-grant datapack edits). A respec is covered because Pufferfish's `resetSkills` now emits a lock event per skill it locks.
 3. The client press of the cast keybind sends a `CastInnatePayload(spellId)`. The server re-derives the pool (authoritative), confirms the requested spell is in it, and calls `AbstractSpell.attemptInitiateCast(ItemStack.EMPTY, level, world, player, CastSource.SPELLBOOK, true, "innate")` with the level clamped to the spell's range.
 
 Client side:
@@ -74,7 +74,7 @@ Client side:
 
 The atlas at `assets/irons_spellbooks_pufferfish_compat/textures/gui/icons.png` is a verbatim copy of ISS's `icons.png` (CC-BY-4.0, see CREDITS.md). The cooldown overlay on the wheel is **not** ported because read APIs for `ClientMagicData.getCooldownPercent` live outside the `:api` classifier.
 
-Why event-driven **plus** a slow poll? Pufferfish's `SkillUnlock`/`SkillLock` events fire `(ResourceLocation category, String skill)` with no player, so we can't target a push — but they're rare, so on each event we just resync every online player (the diff-cache suppresses redundant packets). The events are not complete, though: category resets/respec and the `*Silently` point-mutation methods fire no event (confirmed in bytecode — `resetSkills` calls `updateRewards`/`showCategory` directly). The 10-second poll is the safety net that catches those. Recompute cost is bounded by `InnateSpellGrants.grantingSkills()` (datapack-defined, small), not by tree size or how much the player has unlocked. (If Pufferfish merges a reset event + player-carrying signatures, the poll can be dropped entirely.)
+Why purely event-driven (no poll)? Pufferfish 0.18.0+ fires `SkillUnlock`/`SkillLock` as `(ServerPlayer player, ResourceLocation category, String skill)` and `resetSkills` emits a lock event per skill it locks, so the events are both player-targeted and complete — a respec arrives as a burst of lock events, each correctly attributed. We react only to the affected player, and only when the changed skill grants an innate spell, so the per-event cost is O(1)-ish (a `Set.contains`) and recompute happens just for the one player. `OnDatapackSyncEvent` covers login and `/reload`. The `puffish_skills` floor in `neoforge.mods.toml` is set to `[0.18,)` so older Pufferfish loads are rejected cleanly at the load screen rather than crashing on the first event.
 
 ## Architecture
 
@@ -90,7 +90,7 @@ innate/InnateSpellGrants         SimpleJsonResourceReloadListener at innate_spel
 innate/InnatePool                composes a ServerPlayer's current pool from grants + Pufferfish state; dedupes by spell, keeps highest level
 
 skills/PuffishSkillsLookup       isolates Pufferfish API: hasUnlocked(player, SkillKey)
-skills/InnateSyncBootstrap       pool sync to clients: login + SkillsAPI unlock/lock events + 10s safety-net poll, diff-gated
+skills/InnateSyncBootstrap       pool sync to clients: player-targeted SkillsAPI unlock/lock events (gated to granting skills) + OnDatapackSyncEvent (login + /reload), diff-gated
 
 cast/SkillGateEvaluator          shared gate logic; owns collectRequiredSkills + blockIfMissingRequiredSkill
 cast/SpellCastGate               SpellPreCastEvent handler (the cast gate); delegates to SkillGateEvaluator
@@ -166,5 +166,6 @@ When asked to review code, do a "pass", check for issues, or otherwise audit a r
 
 1. **Self-audit first.** Read the diff yourself. Fix the obvious — dead code, comments, naming, anything that violates the Code Style rules above. Report findings.
 2. **Then spawn an independent reviewer** via the `/code-review` skill or a fresh agent. Give it only the diff and the goal, no context about why you made the choices you did. That catches the bugs you would otherwise rationalize away.
+3. **Project Problems check** by running a whole project search in the problems / project tab. Have the user download and put this file into the root as a file called  to check. Ask before deploys if we should do this.
 
 Don't skip step 2 because step 1 looked clean — the value of the independent reviewer is exactly that it doesn't share your blind spots.

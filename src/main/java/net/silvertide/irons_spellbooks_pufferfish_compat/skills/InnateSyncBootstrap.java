@@ -1,18 +1,18 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.skills;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnatePool;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrant;
+import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrants;
 import net.silvertide.irons_spellbooks_pufferfish_compat.network.InnatePoolPayload;
 
 import java.util.List;
@@ -22,21 +22,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID)
 public final class InnateSyncBootstrap {
-    public static final int RESYNC_INTERVAL_TICKS = 200;
-
     private static final Map<UUID, List<InnateSpellGrant>> lastSentPoolByPlayer = new ConcurrentHashMap<>();
-    private static int sinceLastTickCheck = 0;
 
     private InnateSyncBootstrap() {}
 
     public static void registerSkillChangeListeners() {
-        SkillsAPI.registerSkillUnlockEvent((category, skill) -> resyncAllOnPlayerThread());
-        SkillsAPI.registerSkillLockEvent((category, skill) -> resyncAllOnPlayerThread());
+        SkillsAPI.registerSkillUnlockEvent(InnateSyncBootstrap::onSkillChanged);
+        SkillsAPI.registerSkillLockEvent(InnateSyncBootstrap::onSkillChanged);
+    }
+
+    private static void onSkillChanged(ServerPlayer player, ResourceLocation category, String skill) {
+        if (InnateSpellGrants.INSTANCE.grantingSkills().contains(new SkillKey(category, skill))) {
+            syncIfChanged(player);
+        }
     }
 
     @SubscribeEvent
-    static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) syncIfChanged(player);
+    static void onDatapackSync(OnDatapackSyncEvent event) {
+        event.getRelevantPlayers().forEach(InnateSyncBootstrap::syncIfChanged);
     }
 
     @SubscribeEvent
@@ -47,26 +50,6 @@ public final class InnateSyncBootstrap {
     @SubscribeEvent
     static void onServerStopping(ServerStoppingEvent event) {
         lastSentPoolByPlayer.clear();
-        sinceLastTickCheck = 0;
-    }
-
-    @SubscribeEvent
-    static void onServerTick(ServerTickEvent.Post event) {
-        if (++sinceLastTickCheck < RESYNC_INTERVAL_TICKS) return;
-        sinceLastTickCheck = 0;
-        resyncAll(event.getServer());
-    }
-
-    private static void resyncAllOnPlayerThread() {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (server == null) return;
-        server.execute(() -> resyncAll(server));
-    }
-
-    private static void resyncAll(MinecraftServer server) {
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            syncIfChanged(player);
-        }
     }
 
     private static void syncIfChanged(ServerPlayer player) {

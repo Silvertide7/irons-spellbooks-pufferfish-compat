@@ -48,13 +48,15 @@ public final class ClientInnateState {
     public static void cycleNext() {
         int size = pool.size();
         if (size <= 1) return;
-        selectedIndex = (selectedIndex + 1) % size;
+        int currentIndex = selectedIndex;
+        selectedIndex = (currentIndex + 1) % size;
     }
 
     public static void cyclePrevious() {
         int size = pool.size();
         if (size <= 1) return;
-        selectedIndex = (selectedIndex - 1 + size) % size;
+        int currentIndex = selectedIndex;
+        selectedIndex = (currentIndex - 1 + size) % size;
     }
 
     public static void setSelectedIndex(int index) {
