@@ -18,7 +18,7 @@ public final class ClientConfig {
         builder.push("SelectedInnateSpell");
         builder.comment("How the selected-innate-spell badge appears. Always = persistent; Contextual = fades in on change/cast then fades out; Never = hidden.");
         HUD_DISPLAY = builder.defineEnum("display", InnateHudDisplay.Always);
-        builder.comment("Pixel offset from the default position (just left of the hotbar's first slot, aligned with the hotbar).");
+        builder.comment("Pixel offset from the default position (just left of the offhand slot, aligned with the hotbar).");
         SELECTED_X_OFFSET = builder.define("xOffset", 0);
         SELECTED_Y_OFFSET = builder.define("yOffset", 0);
         builder.pop();

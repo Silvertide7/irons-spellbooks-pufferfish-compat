@@ -34,8 +34,9 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
     private static final int SELECTED_OUTLINE_V = 84;
 
     private static final int HOTBAR_HALF_WIDTH = 91;
+    private static final int OFFHAND_SLOT_WIDTH = 29;
     private static final int HOTBAR_PIXEL_HEIGHT = 22;
-    private static final int GAP_FROM_HOTBAR = 2;
+    private static final int GAP_FROM_OFFHAND_SLOT = 2;
     private static final float ALPHA_FADE_DENOMINATOR = 20f;
 
     private int contextualFadeoutTicksRemaining;
@@ -80,7 +81,8 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
 
         int screenWidth = graphics.guiWidth();
         int screenHeight = graphics.guiHeight();
-        int defaultX = screenWidth / 2 - HOTBAR_HALF_WIDTH - SPRITE_SIZE - GAP_FROM_HOTBAR;
+        int offhandSlotLeftEdge = screenWidth / 2 - HOTBAR_HALF_WIDTH - OFFHAND_SLOT_WIDTH;
+        int defaultX = offhandSlotLeftEdge - SPRITE_SIZE - GAP_FROM_OFFHAND_SLOT;
         int defaultY = screenHeight - HOTBAR_PIXEL_HEIGHT;
         int x = defaultX + ClientConfig.SELECTED_X_OFFSET.get();
         int y = defaultY + ClientConfig.SELECTED_Y_OFFSET.get();
