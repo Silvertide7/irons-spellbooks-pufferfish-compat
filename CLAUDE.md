@@ -69,7 +69,7 @@ Client side:
 2. `InnateKeybinds` registers four `KeyMapping`s (`OPEN_WHEEL` hold, `TOGGLE_WHEEL`, `CAST_INNATE`, `SCROLL_CYCLE_MODIFIER` hold).
 3. `InnateInputHandler` (`ClientTickEvent.Post` + `InputEvent.MouseScrollingEvent`) handles all of it: drains cast clicks → sends packet, hold-to-open + release-to-commit on the wheel key, scroll-while-modifier cycles selection, toggle key flips the wheel.
 4. `InnateHudLayers` (`RegisterGuiLayersEvent`) registers two overlays above all vanilla layers:
-   - `InnateSelectedSpellOverlay` — single-slot badge for the currently selected innate spell (slot frame + spell icon + selected-outline ring, blitted from `icons.png`). Default position is the slot immediately left of the hotbar's first item slot; configurable via `selectedXOffset` / `selectedYOffset`.
+   - `InnateSelectedSpellOverlay` — single-slot badge for the currently selected innate spell (slot frame + spell icon + selected-outline ring, blitted from `icons.png`). Default position is the slot immediately left of the offhand slot; configurable via `selectedXOffset` / `selectedYOffset`.
    - `InnateSpellWheelOverlay` — radial menu with mouse-cursor wedge selection, spell info text (name, level, mana, unique effects). Ported from `SpellWheelOverlay`. Mouse is released on open and re-grabbed on close.
 
 The atlas at `assets/irons_spellbooks_pufferfish_compat/textures/gui/icons.png` is a verbatim copy of ISS's `icons.png` (CC-BY-4.0, see CREDITS.md). The cooldown overlay on the wheel is **not** ported because read APIs for `ClientMagicData.getCooldownPercent` live outside the `:api` classifier.
