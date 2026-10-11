@@ -41,7 +41,7 @@ public final class InnateSyncBootstrap {
     }
 
     @SubscribeEvent
-    static void onDatapackSync(OnDatapackSyncEvent event) {
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
         List<ServerPlayer> relevantPlayers = event.getPlayer() != null
                 ? List.of(event.getPlayer())
                 : event.getPlayerList().getPlayers();
@@ -49,17 +49,17 @@ public final class InnateSyncBootstrap {
     }
 
     @SubscribeEvent
-    static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) syncIfChanged(player);
     }
 
     @SubscribeEvent
-    static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         lastSentPoolByPlayer.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
-    static void onServerStopping(ServerStoppingEvent event) {
+    public static void onServerStopping(ServerStoppingEvent event) {
         lastSentPoolByPlayer.clear();
     }
 

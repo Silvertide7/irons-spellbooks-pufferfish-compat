@@ -9,6 +9,7 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat;
 import net.silvertide.irons_spellbooks_pufferfish_compat.skills.SkillKey;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,7 +27,7 @@ public final class SpellSkillRequirements extends SimpleJsonResourceReloadListen
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> rawEntries, ResourceManager resourceManager, ProfilerFiller profiler) {
+    protected void apply(@NotNull Map<ResourceLocation, JsonElement> rawEntries, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         requiredSkillsBySpell = parseAll(rawEntries);
     }
 

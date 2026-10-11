@@ -8,7 +8,6 @@
   "key.irons_spellbooks_pufferfish_compat.cast_innate": "Cast innate spell",
   "key.irons_spellbooks_pufferfish_compat.scroll_cycle_modifier": "Scroll to cycle innate spells (hold)",
 
-  "hud.irons_spellbooks_pufferfish_compat.innate_label": "Innate",
   "hud.irons_spellbooks_pufferfish_compat.innate_tag": "[ Innate ]",
   "hud.irons_spellbooks_pufferfish_compat.wheel_level": "Level %s",
   "hud.irons_spellbooks_pufferfish_compat.wheel_mana": "Mana cost: %s"

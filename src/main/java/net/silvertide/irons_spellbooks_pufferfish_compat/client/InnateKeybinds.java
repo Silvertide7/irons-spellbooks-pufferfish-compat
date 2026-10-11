@@ -45,7 +45,7 @@ public final class InnateKeybinds {
     private InnateKeybinds() {}
 
     @SubscribeEvent
-    static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(OPEN_WHEEL);
         event.register(TOGGLE_WHEEL);
         event.register(CAST_INNATE);

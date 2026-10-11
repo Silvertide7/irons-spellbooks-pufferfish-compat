@@ -22,7 +22,7 @@ public final class InnateInputHandler {
     private InnateInputHandler() {}
 
     @SubscribeEvent
-    static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         if (Minecraft.getInstance().player == null) return;
 
@@ -57,7 +57,7 @@ public final class InnateInputHandler {
     }
 
     @SubscribeEvent
-    static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
         if (Minecraft.getInstance().player == null) return;
         if (!InnateKeybinds.SCROLL_CYCLE_MODIFIER.isDown()) return;
         if (ClientInnateState.pool().isEmpty()) return;

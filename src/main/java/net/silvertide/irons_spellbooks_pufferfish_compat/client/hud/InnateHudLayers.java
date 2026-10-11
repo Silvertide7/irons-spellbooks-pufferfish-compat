@@ -14,7 +14,7 @@ public final class InnateHudLayers {
     private InnateHudLayers() {}
 
     @SubscribeEvent
-    static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
+    public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll(SELECTED_OVERLAY_ID, InnateSelectedSpellOverlay.INSTANCE);
         event.registerAboveAll(WHEEL_OVERLAY_ID, InnateSpellWheelOverlay.INSTANCE);
     }

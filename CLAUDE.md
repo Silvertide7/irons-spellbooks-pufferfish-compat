@@ -2,7 +2,7 @@
 
 Forge **1.20.1** mod (Java 17, Forge 47.4.10, ForgeGradle 6 + Parchment, Gradle 8.8) that bridges Iron's Spells 'n Spellbooks and Pufferfish's Skills.
 
-This branch (`1-20-1`) is the Forge backport of the NeoForge 1.21.1 mod on `main`; see `~/Workspace/minecraft/personal/claude_reference/forge-port/` for the port guide. Every mod dependency is wrapped in `fg.deobf(...)` and the shipped jar is SRG-remapped by `reobfJar`. Metadata lives in `src/main/resources/META-INF/mods.toml` + `pack.mcmeta` (pack format 15), expanded by `processResources`. The Forge floor is `[47.4,)` because Iron's Spellbooks 1.20.1 itself requires 47.4.0+, which also makes the forward-ported `ResourceLocation.fromNamespaceAndPath` safe.
+This branch (`1-20-1`) is the Forge backport of the NeoForge 1.21.1 mod on `main`; see `~/Workspace/minecraft/personal/claude_reference/forge-port/` for the port guide. Every mod dependency is wrapped in `fg.deobf(...)` and the shipped jar is SRG-remapped by `reobfJar`. Metadata lives in `src/main/resources/META-INF/mods.toml` + `pack.mcmeta` (pack format 15), expanded by `processResources`. The Forge floor is `[47.4,)` because we use the forward-ported `ResourceLocation.fromNamespaceAndPath` (47.3.19+) and `FMLJavaModLoadingContext` constructor injection (47.3.10+); current Iron's Spellbooks (3.4.0.11+) requires 47.4.0 anyway. The `irons_spellbooks` floor is `[1.20.1-3.1.4,)` — the first build exposing every ISS API we call (`AbstractSpell.getLevelFor(int, LivingEntity)` is missing before it, which would crash the wheel).
 
 ## Features
 
@@ -116,7 +116,7 @@ client/hud/InnateHudLayers       RegisterGuiOverlaysEvent (MOD bus) — register
 config/ClientConfig              ForgeConfigSpec: HUD_DISPLAY, SELECTED_X/Y_OFFSET, WHEEL_SCALE, WHEEL_CONSISTENT_SIZE
 ```
 
-Asset & code attribution lives in `CREDITS.md`. `assets/.../textures/gui/icons.png` is a verbatim CC-BY-4.0 copy of ISS's atlas; the two overlay classes and `InnateBarLayout` are MIT-licensed ports of ISS source code.
+Asset & code attribution lives in `CREDITS.md`. `assets/.../textures/gui/icons.png` is a verbatim CC-BY-4.0 copy of ISS's atlas; the two overlay classes are MIT-licensed ports of ISS source code.
 
 Each cross-mod call lives in exactly one class: Iron's Spellbooks goes through `SpellCastGate` and `InnateSpellCaster`; Pufferfish goes through `PuffishSkillsLookup` and `InnatePool`. The blast radius of upstream API churn is contained.
 
