@@ -1,20 +1,20 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.client;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
 import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat;
 import net.silvertide.irons_spellbooks_pufferfish_compat.client.hud.InnateSelectedSpellOverlay;
 import net.silvertide.irons_spellbooks_pufferfish_compat.client.hud.InnateSpellWheelOverlay;
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.ClientConfig;
 import net.silvertide.irons_spellbooks_pufferfish_compat.config.InnateHudDisplay;
 import net.silvertide.irons_spellbooks_pufferfish_compat.network.CastInnatePayload;
+import net.silvertide.irons_spellbooks_pufferfish_compat.network.CompatPayloads;
 
-@EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID, value = Dist.CLIENT)
 public final class InnateInputHandler {
     private static final int CONTEXTUAL_REVEAL_TICKS_ON_SCROLL_HOLD = 40;
     private static boolean wasWheelKeyDown = false;
@@ -22,12 +22,13 @@ public final class InnateInputHandler {
     private InnateInputHandler() {}
 
     @SubscribeEvent
-    static void onClientTick(ClientTickEvent.Post event) {
+    static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
         if (Minecraft.getInstance().player == null) return;
 
         while (InnateKeybinds.CAST_INNATE.consumeClick()) {
             ClientInnateState.selectedGrant().ifPresent(grant -> {
-                PacketDistributor.sendToServer(new CastInnatePayload(grant.spell()));
+                CompatPayloads.sendToServer(new CastInnatePayload(grant.spell()));
                 InnateSelectedSpellOverlay.reveal();
             });
         }
@@ -61,10 +62,10 @@ public final class InnateInputHandler {
         if (!InnateKeybinds.SCROLL_CYCLE_MODIFIER.isDown()) return;
         if (ClientInnateState.pool().isEmpty()) return;
 
-        double scrollDeltaY = event.getScrollDeltaY();
-        if (scrollDeltaY > 0) {
+        double scrollDelta = event.getScrollDelta();
+        if (scrollDelta > 0) {
             ClientInnateState.cyclePrevious();
-        } else if (scrollDeltaY < 0) {
+        } else if (scrollDelta < 0) {
             ClientInnateState.cycleNext();
         } else {
             return;

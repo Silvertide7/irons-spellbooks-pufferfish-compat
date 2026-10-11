@@ -2,9 +2,7 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.innate;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 public record InnateSpellGrant(ResourceLocation spell, int level) {
@@ -17,8 +15,12 @@ public record InnateSpellGrant(ResourceLocation spell, int level) {
                     .optionalFieldOf("level", DEFAULT_LEVEL).forGetter(InnateSpellGrant::level)
     ).apply(instance, InnateSpellGrant::new));
 
-    public static final StreamCodec<ByteBuf, InnateSpellGrant> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, InnateSpellGrant::spell,
-            ByteBufCodecs.VAR_INT, InnateSpellGrant::level,
-            InnateSpellGrant::new);
+    public void encode(FriendlyByteBuf buffer) {
+        buffer.writeResourceLocation(spell);
+        buffer.writeVarInt(level);
+    }
+
+    public static InnateSpellGrant decode(FriendlyByteBuf buffer) {
+        return new InnateSpellGrant(buffer.readResourceLocation(), buffer.readVarInt());
+    }
 }

@@ -1,6 +1,8 @@
 # Iron's Spellbooks ↔ Pufferfish's Skills compat
 
-NeoForge 1.21.1 mod that bridges Iron's Spells 'n Spellbooks and Pufferfish's Skills.
+Forge **1.20.1** mod (Java 17, Forge 47.4.10, ForgeGradle 6 + Parchment, Gradle 8.8) that bridges Iron's Spells 'n Spellbooks and Pufferfish's Skills.
+
+This branch (`1-20-1`) is the Forge backport of the NeoForge 1.21.1 mod on `main`; see `~/Workspace/minecraft/personal/claude_reference/forge-port/` for the port guide. Every mod dependency is wrapped in `fg.deobf(...)` and the shipped jar is SRG-remapped by `reobfJar`. Metadata lives in `src/main/resources/META-INF/mods.toml` + `pack.mcmeta` (pack format 15), expanded by `processResources`. The Forge floor is `[47.4,)` because Iron's Spellbooks 1.20.1 itself requires 47.4.0+, which also makes the forward-ported `ResourceLocation.fromNamespaceAndPath` safe.
 
 ## Features
 
@@ -60,21 +62,21 @@ A small badge to the left of the hotbar shows only the *currently selected* inna
 Server side:
 
 1. `InnateSpellGrants` (datapack reload listener) holds a `Map<SkillKey, InnateSpellGrant>` parsed from `innate_spells/*.json`.
-2. `InnateSyncBootstrap` recomputes a player's pool and pushes `InnatePoolPayload` only when the pool changes (value equality against the last snapshot sent). It recomputes on two triggers: Pufferfish's `SkillsAPI` unlock/lock events — targeted to the affected player (the event carries the `ServerPlayer`) and gated to skills that actually grant an innate spell (`InnateSpellGrants.grantingSkills().contains(skillKey)`), so unrelated skill changes cost nothing; and `OnDatapackSyncEvent`, which fires on login (syncs the joining player) and on `/reload` (resyncs all online players, catching innate-grant datapack edits). A respec is covered because Pufferfish's `resetSkills` now emits a lock event per skill it locks.
+2. `InnateSyncBootstrap` recomputes a player's pool and pushes `InnatePoolPayload` only when the pool changes (value equality against the last snapshot sent). It recomputes on three triggers: Pufferfish's `SkillsAPI` unlock/lock events — targeted to the affected player (the event carries the `ServerPlayer`) and gated to skills that actually grant an innate spell (`InnateSpellGrants.grantingSkills().contains(skillKey)`), so unrelated skill changes cost nothing; `OnDatapackSyncEvent`, which fires on login (syncs the joining player) and on `/reload` (resyncs all online players, catching innate-grant datapack edits); and `PlayerRespawnEvent`, because Pufferfish's erase-on-death and `importPlayerData` change skills without firing lock events. The Pufferfish listeners are registered inside `FMLCommonSetupEvent.enqueueWork` so they land on the main thread rather than a parallel mod-loading worker. A respec is covered because Pufferfish's `resetSkills` now emits a lock event per skill it locks.
 3. The client press of the cast keybind sends a `CastInnatePayload(spellId)`. The server re-derives the pool (authoritative), confirms the requested spell is in it, and calls `AbstractSpell.attemptInitiateCast(ItemStack.EMPTY, level, world, player, CastSource.SPELLBOOK, true, "innate")` with the level clamped to the spell's range.
 
 Client side:
 
 1. `InnatePayloadHandler` updates `ClientInnateState` on every pool sync.
 2. `InnateKeybinds` registers four `KeyMapping`s (`OPEN_WHEEL` hold, `TOGGLE_WHEEL`, `CAST_INNATE`, `SCROLL_CYCLE_MODIFIER` hold).
-3. `InnateInputHandler` (`ClientTickEvent.Post` + `InputEvent.MouseScrollingEvent`) handles all of it: drains cast clicks → sends packet, hold-to-open + release-to-commit on the wheel key, scroll-while-modifier cycles selection, toggle key flips the wheel.
-4. `InnateHudLayers` (`RegisterGuiLayersEvent`) registers two overlays above all vanilla layers:
+3. `InnateInputHandler` (`TickEvent.ClientTickEvent` at `Phase.END` + `InputEvent.MouseScrollingEvent`) handles all of it: drains cast clicks → sends packet, hold-to-open + release-to-commit on the wheel key, scroll-while-modifier cycles selection, toggle key flips the wheel.
+4. `InnateHudLayers` (`RegisterGuiOverlaysEvent`, MOD bus) registers two `IGuiOverlay`s above all vanilla overlays:
    - `InnateSelectedSpellOverlay` — single-slot badge for the currently selected innate spell (slot frame + spell icon + selected-outline ring, blitted from `icons.png`). Default position is the slot immediately left of the offhand slot; configurable via `selectedXOffset` / `selectedYOffset`.
    - `InnateSpellWheelOverlay` — radial menu with mouse-cursor wedge selection, spell info text (name, level, mana, unique effects). Ported from `SpellWheelOverlay`. Mouse is released on open and re-grabbed on close.
 
 The atlas at `assets/irons_spellbooks_pufferfish_compat/textures/gui/icons.png` is a verbatim copy of ISS's `icons.png` (CC-BY-4.0, see CREDITS.md). The cooldown overlay on the wheel is **not** ported because read APIs for `ClientMagicData.getCooldownPercent` live outside the `:api` classifier.
 
-Why purely event-driven (no poll)? Pufferfish 0.18.0+ fires `SkillUnlock`/`SkillLock` as `(ServerPlayer player, ResourceLocation category, String skill)` and `resetSkills` emits a lock event per skill it locks, so the events are both player-targeted and complete — a respec arrives as a burst of lock events, each correctly attributed. We react only to the affected player, and only when the changed skill grants an innate spell, so the per-event cost is O(1)-ish (a `Set.contains`) and recompute happens just for the one player. `OnDatapackSyncEvent` covers login and `/reload`. The `puffish_skills` floor in `neoforge.mods.toml` is set to `[0.18,)` so older Pufferfish loads are rejected cleanly at the load screen rather than crashing on the first event.
+Why purely event-driven (no poll)? Pufferfish 0.18.0+ fires `SkillUnlock`/`SkillLock` as `(ServerPlayer player, ResourceLocation category, String skill)` and `resetSkills` emits a lock event per skill it locks, so the events are both player-targeted and complete — a respec arrives as a burst of lock events, each correctly attributed. We react only to the affected player, and only when the changed skill grants an innate spell, so the per-event cost is O(1)-ish (a `Set.contains`) and recompute happens just for the one player. `OnDatapackSyncEvent` covers login and `/reload`. The `puffish_skills` floor in `mods.toml` is set to `[0.18,)` so older Pufferfish loads are rejected cleanly at the load screen rather than crashing on the first event.
 
 ## Architecture
 
@@ -85,12 +87,12 @@ requirement/SpellSkillRequirement      record: (spells: List<ResourceLocation>, 
 requirement/SpellSkillRequirements     SimpleJsonResourceReloadListener at spell_skill_requirements/; fans each rule out into Map<spell, Set<SkillKey>> (union across rules)
 
 skills/SkillKey                  record: (category: ResourceLocation, skill: String) + Codec
-innate/InnateSpellGrant          record: (spell, level) + Codec + StreamCodec
+innate/InnateSpellGrant          record: (spell, level) + Codec + FriendlyByteBuf encode/decode
 innate/InnateSpellGrants         SimpleJsonResourceReloadListener at innate_spells/, keyed by SkillKey
 innate/InnatePool                composes a ServerPlayer's current pool from grants + Pufferfish state; dedupes by spell, keeps highest level
 
 skills/PuffishSkillsLookup       isolates Pufferfish API: hasUnlocked(player, SkillKey)
-skills/InnateSyncBootstrap       pool sync to clients: player-targeted SkillsAPI unlock/lock events (gated to granting skills) + OnDatapackSyncEvent (login + /reload), diff-gated
+skills/InnateSyncBootstrap       pool sync to clients: player-targeted SkillsAPI unlock/lock events (gated to granting skills) + OnDatapackSyncEvent (login + /reload) + PlayerRespawnEvent, diff-gated
 
 cast/SkillGateEvaluator          shared gate logic; owns collectRequiredSkills + blockIfMissingRequiredSkill
 cast/SpellCastGate               SpellPreCastEvent handler (the cast gate); delegates to SkillGateEvaluator
@@ -99,7 +101,7 @@ cast/InnateSpellCaster           server-side: attemptInitiateCast with ItemStack
 
 network/CastInnatePayload        C→S: cast the named spell (server re-derives the authoritative pool)
 network/InnatePoolPayload        S→C: full pool snapshot
-network/CompatPayloads           payload registration on the MOD bus
+network/CompatPayloads           SimpleChannel registration (called from the mod constructor) + sendToPlayer/sendToServer; S2C handler runs behind DistExecutor
 
 client/ClientInnateState         volatile pool + selected index (cycleBy, setSelectedIndex)
 client/InnateKeybinds            four KeyMappings (open/toggle wheel, cast, scroll modifier)
@@ -109,9 +111,9 @@ client/InnatePayloadHandler      client-side pool sync entry point
 config/InnateHudDisplay          enum (Always | Contextual | Never)
 client/hud/InnateSelectedSpellOverlay  single-slot badge for the currently selected innate spell
 client/hud/InnateSpellWheelOverlay  radial wheel (port of SpellWheelOverlay)
-client/hud/InnateHudLayers       RegisterGuiLayersEvent — registers both overlays
+client/hud/InnateHudLayers       RegisterGuiOverlaysEvent (MOD bus) — registers both overlays
 
-config/ClientConfig              ModConfigSpec: HUD_DISPLAY, SELECTED_X/Y_OFFSET, WHEEL_SCALE, WHEEL_CONSISTENT_SIZE
+config/ClientConfig              ForgeConfigSpec: HUD_DISPLAY, SELECTED_X/Y_OFFSET, WHEEL_SCALE, WHEEL_CONSISTENT_SIZE
 ```
 
 Asset & code attribution lives in `CREDITS.md`. `assets/.../textures/gui/icons.png` is a verbatim CC-BY-4.0 copy of ISS's atlas; the two overlay classes and `InnateBarLayout` are MIT-licensed ports of ISS source code.

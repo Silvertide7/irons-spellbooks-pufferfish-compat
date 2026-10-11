@@ -5,11 +5,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.api.util.Utils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -29,7 +29,7 @@ import org.joml.Vector4f;
 import java.util.List;
 import java.util.Optional;
 
-public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
+public final class InnateSpellWheelOverlay implements IGuiOverlay {
     public static final InnateSpellWheelOverlay INSTANCE = new InnateSpellWheelOverlay();
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             IronsSpellbooksPufferfishCompat.MODID, "textures/gui/icons.png");
@@ -95,7 +95,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
     }
 
     @Override
-    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || minecraft.player == null || minecraft.player.isSpectator() || !active) {
             return;
@@ -112,8 +112,6 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
             return;
         }
 
-        int screenWidth = graphics.guiWidth();
-        int screenHeight = graphics.guiHeight();
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
 
@@ -153,6 +151,7 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
 
         drawRadialBackgrounds(graphics, centerX, centerY, wheelSelection, totalSpells);
         drawDividingLines(graphics, centerX, centerY, totalSpells);
+        graphics.flush();
 
         renderInfoText(graphics, minecraft.font, minecraft.player, pool.get(wheelSelection), centerX, centerY);
         renderSpellIcons(graphics, pool, centerX, centerY, totalSpells, radiansPerSpell);
@@ -272,14 +271,14 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
             boolean isHighlighted = (i * totalSpells) / segments == highlightedSpellIndex;
             Vector4f buttonColor = isHighlighted ? HIGHLIGHT_COLOR : RADIAL_BUTTON_COLOR;
 
-            vertexConsumer.addVertex(pose, centerX + x1Inner, centerY + y1Inner, 0)
-                    .setColor(buttonColor.x(), buttonColor.y(), buttonColor.z(), buttonColor.w());
-            vertexConsumer.addVertex(pose, centerX + x2Inner, centerY + y2Inner, 0)
-                    .setColor(buttonColor.x(), buttonColor.y(), buttonColor.z(), buttonColor.w());
-            vertexConsumer.addVertex(pose, centerX + x2Outer, centerY + y2Outer, 0)
-                    .setColor(buttonColor.x(), buttonColor.y(), buttonColor.z(), 0);
-            vertexConsumer.addVertex(pose, centerX + x1Outer, centerY + y1Outer, 0)
-                    .setColor(buttonColor.x(), buttonColor.y(), buttonColor.z(), 0);
+            vertexConsumer.vertex(pose, centerX + x1Inner, centerY + y1Inner, 0)
+                    .color(buttonColor.x(), buttonColor.y(), buttonColor.z(), buttonColor.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x2Inner, centerY + y2Inner, 0)
+                    .color(buttonColor.x(), buttonColor.y(), buttonColor.z(), buttonColor.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x2Outer, centerY + y2Outer, 0)
+                    .color(buttonColor.x(), buttonColor.y(), buttonColor.z(), 0).endVertex();
+            vertexConsumer.vertex(pose, centerX + x1Outer, centerY + y1Outer, 0)
+                    .color(buttonColor.x(), buttonColor.y(), buttonColor.z(), 0).endVertex();
 
             float categoryLineEdge = RING_INNER_EDGE + CATEGORY_LINE_EXTENSION;
             float x1CategoryOuter = Mth.cos(beginRadians) * categoryLineEdge;
@@ -287,14 +286,14 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
             float y1CategoryOuter = Mth.sin(beginRadians) * categoryLineEdge;
             float y2CategoryOuter = Mth.sin(endRadians) * categoryLineEdge;
 
-            vertexConsumer.addVertex(pose, centerX + x1Inner, centerY + y1Inner, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w());
-            vertexConsumer.addVertex(pose, centerX + x2Inner, centerY + y2Inner, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w());
-            vertexConsumer.addVertex(pose, centerX + x2CategoryOuter, centerY + y2CategoryOuter, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w());
-            vertexConsumer.addVertex(pose, centerX + x1CategoryOuter, centerY + y1CategoryOuter, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w());
+            vertexConsumer.vertex(pose, centerX + x1Inner, centerY + y1Inner, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x2Inner, centerY + y2Inner, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x2CategoryOuter, centerY + y2CategoryOuter, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x1CategoryOuter, centerY + y1CategoryOuter, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w()).endVertex();
         }
     }
 
@@ -323,14 +322,14 @@ public final class InnateSpellWheelOverlay implements LayeredDraw.Layer {
             float y1Outer = Mth.sin(beginFarRadians) * RING_OUTER_EDGE * 1.4f;
             float y2Outer = Mth.sin(endFarRadians) * RING_OUTER_EDGE * 1.4f;
 
-            vertexConsumer.addVertex(pose, centerX + x1Inner, centerY + y1Inner, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w());
-            vertexConsumer.addVertex(pose, centerX + x2Inner, centerY + y2Inner, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w());
-            vertexConsumer.addVertex(pose, centerX + x2Outer, centerY + y2Outer, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), 0);
-            vertexConsumer.addVertex(pose, centerX + x1Outer, centerY + y1Outer, 0)
-                    .setColor(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), 0);
+            vertexConsumer.vertex(pose, centerX + x1Inner, centerY + y1Inner, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x2Inner, centerY + y2Inner, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), LINE_COLOR.w()).endVertex();
+            vertexConsumer.vertex(pose, centerX + x2Outer, centerY + y2Outer, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), 0).endVertex();
+            vertexConsumer.vertex(pose, centerX + x1Outer, centerY + y1Outer, 0)
+                    .color(LINE_COLOR.x(), LINE_COLOR.y(), LINE_COLOR.z(), 0).endVertex();
         }
     }
 }

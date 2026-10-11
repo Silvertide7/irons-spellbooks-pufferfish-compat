@@ -2,10 +2,10 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +18,7 @@ import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpells;
 
 import java.util.Optional;
 
-public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
+public final class InnateSelectedSpellOverlay implements IGuiOverlay {
     public static final InnateSelectedSpellOverlay INSTANCE = new InnateSelectedSpellOverlay();
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             IronsSpellbooksPufferfishCompat.MODID, "textures/gui/icons.png");
@@ -58,7 +58,7 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
     }
 
     @Override
-    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || minecraft.player == null || minecraft.player.isSpectator()) return;
 
@@ -79,8 +79,6 @@ public final class InnateSelectedSpellOverlay implements LayeredDraw.Layer {
         if (resolvedSpell.isEmpty()) return;
         AbstractSpell spell = resolvedSpell.get();
 
-        int screenWidth = graphics.guiWidth();
-        int screenHeight = graphics.guiHeight();
         int offhandSlotLeftEdge = screenWidth / 2 - HOTBAR_HALF_WIDTH - OFFHAND_SLOT_WIDTH;
         int defaultX = offhandSlotLeftEdge - SPRITE_SIZE - GAP_FROM_OFFHAND_SLOT;
         int defaultY = screenHeight - HOTBAR_PIXEL_HEIGHT;

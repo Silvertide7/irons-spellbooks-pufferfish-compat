@@ -2,11 +2,11 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.cast;
 
 import io.redspace.ironsspellbooks.api.events.InscribeSpellEvent;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat;
 
-@EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID)
+@Mod.EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID)
 public final class SpellInscribeGate {
     public static final String SKILL_REQUIRED_TRANSLATION_KEY =
             "message." + IronsSpellbooksPufferfishCompat.MODID + ".skill_required_inscribe";

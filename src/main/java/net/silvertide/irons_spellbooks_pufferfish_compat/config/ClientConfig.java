@@ -1,19 +1,19 @@
 package net.silvertide.irons_spellbooks_pufferfish_compat.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 public final class ClientConfig {
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
-    public static final ModConfigSpec.ConfigValue<InnateHudDisplay> HUD_DISPLAY;
-    public static final ModConfigSpec.ConfigValue<Integer> SELECTED_X_OFFSET;
-    public static final ModConfigSpec.ConfigValue<Integer> SELECTED_Y_OFFSET;
+    public static final ForgeConfigSpec.ConfigValue<InnateHudDisplay> HUD_DISPLAY;
+    public static final ForgeConfigSpec.ConfigValue<Integer> SELECTED_X_OFFSET;
+    public static final ForgeConfigSpec.ConfigValue<Integer> SELECTED_Y_OFFSET;
 
-    public static final ModConfigSpec.ConfigValue<Boolean> WHEEL_CONSISTENT_SIZE;
-    public static final ModConfigSpec.ConfigValue<Double> WHEEL_SCALE;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> WHEEL_CONSISTENT_SIZE;
+    public static final ForgeConfigSpec.ConfigValue<Double> WHEEL_SCALE;
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
         builder.push("SelectedInnateSpell");
         builder.comment("How the selected-innate-spell badge appears. Always = persistent; Contextual = fades in on change/cast then fades out; Never = hidden.");

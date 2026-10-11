@@ -2,17 +2,18 @@ package net.silvertide.irons_spellbooks_pufferfish_compat.skills;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.OnDatapackSyncEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.server.ServerStoppingEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.silvertide.irons_spellbooks_pufferfish_compat.IronsSpellbooksPufferfishCompat;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnatePool;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrant;
 import net.silvertide.irons_spellbooks_pufferfish_compat.innate.InnateSpellGrants;
+import net.silvertide.irons_spellbooks_pufferfish_compat.network.CompatPayloads;
 import net.silvertide.irons_spellbooks_pufferfish_compat.network.InnatePoolPayload;
 
 import java.util.List;
@@ -20,15 +21,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID)
+@Mod.EventBusSubscriber(modid = IronsSpellbooksPufferfishCompat.MODID)
 public final class InnateSyncBootstrap {
     private static final Map<UUID, List<InnateSpellGrant>> lastSentPoolByPlayer = new ConcurrentHashMap<>();
 
     private InnateSyncBootstrap() {}
 
-    public static void registerSkillChangeListeners() {
-        SkillsAPI.registerSkillUnlockEvent(InnateSyncBootstrap::onSkillChanged);
-        SkillsAPI.registerSkillLockEvent(InnateSyncBootstrap::onSkillChanged);
+    public static void registerSkillChangeListeners(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            SkillsAPI.registerSkillUnlockEvent(InnateSyncBootstrap::onSkillChanged);
+            SkillsAPI.registerSkillLockEvent(InnateSyncBootstrap::onSkillChanged);
+        });
     }
 
     private static void onSkillChanged(ServerPlayer player, ResourceLocation category, String skill) {
@@ -39,7 +42,15 @@ public final class InnateSyncBootstrap {
 
     @SubscribeEvent
     static void onDatapackSync(OnDatapackSyncEvent event) {
-        event.getRelevantPlayers().forEach(InnateSyncBootstrap::syncIfChanged);
+        List<ServerPlayer> relevantPlayers = event.getPlayer() != null
+                ? List.of(event.getPlayer())
+                : event.getPlayerList().getPlayers();
+        relevantPlayers.forEach(InnateSyncBootstrap::syncIfChanged);
+    }
+
+    @SubscribeEvent
+    static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) syncIfChanged(player);
     }
 
     @SubscribeEvent
@@ -57,6 +68,6 @@ public final class InnateSyncBootstrap {
         List<InnateSpellGrant> lastSentPool = lastSentPoolByPlayer.get(player.getUUID());
         if (currentPool.equals(lastSentPool)) return;
         lastSentPoolByPlayer.put(player.getUUID(), currentPool);
-        PacketDistributor.sendToPlayer(player, new InnatePoolPayload(currentPool));
+        CompatPayloads.sendToPlayer(player, new InnatePoolPayload(currentPool));
     }
 }
